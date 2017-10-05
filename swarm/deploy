@@ -62,7 +62,7 @@ ssh $SSH_USER@$GALERA_NODE3 "${SSH_BECOME} bash -s -- " < util/make-data-vol 3
 echo "Deploying the cluster network: ${GALERA_NETWORK_NAME} ${GALERA_NETWORK} ..."
 ./docker-env network create --driver overlay --subnet $GALERA_NETWORK $GALERA_NETWORK_NAME
 echo
-echo "Deploying the ${STACK_NAME} MariaDB Galera cluster..."
+echo "Deploying the MariaDB Galera ${STACK_NAME} cluster..."
 
 ./docker-env stack deploy -c stacks/mariadb-galera.yml $STACK_NAME
 if [ $? -ne 0 ]; then
