@@ -8,7 +8,9 @@ Configuration details have been distilled into a simple YAML configuration file 
 
 - Copy the __galera-example.yml__ configuration script to __galera.yml__ for the default configuration that works with [cluster-builder](https://github.com/ids/cluster-builder) demo swarms.
 - Copy the __sample-secrets__ folder to __.secrets__ and adjust the values as required
-- Copy the __api-certs__ for the target cluster into the __api-certs__ folder and validate you can connect with:
+- Copy the __api-certs__ for the target cluster into the __api-certs__ folder and validate you can connect.
+
+To test connection to the Swarm and validate the __api-certs__:
 
     bash ./docker-env info
 
@@ -20,7 +22,7 @@ When no configuration file is supplied, it looks in the current path for a __gal
 
 Eg.
 
-  bash deploy tier1 tier1_galera.yml
+    bash deploy tier1 tier1_galera.yml
 
 ## YAML Configuration File Syntax
     
