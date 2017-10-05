@@ -2,6 +2,10 @@ MariaDB Galera Swarm
 ====================
 Automated deployment of the docker based MariaDB Galera cluster into Docker Swarm.
 
+## Notes
+
+- The service name for the galera-haproxy service is the entry point, so if the stack is named "tier1", then the address of the MariaDB cluster for mysql clients is: __tier1_galera-haproxy:3306__.  This is how other containers should connect to MariaDB.
+
 ## Setup
 
 Configuration details have been distilled into a simple YAML configuration file that is read by the BASH script that co-ordinates the stages of deploying a 3 node cluster.
