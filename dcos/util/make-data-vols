@@ -1,0 +1,12 @@
+
+ssh admin@dcos-c1-a7 sudo rm -rf /data/galera*
+ssh admin@dcos-c1-a8 sudo rm -rf /data/galera*
+ssh admin@dcos-c1-a9 sudo rm -rf /data/galera*
+
+ssh admin@dcos-c1-a7 sudo mkdir -p /data/galera_node1
+ssh admin@dcos-c1-a8 sudo mkdir -p /data/galera_node2
+ssh admin@dcos-c1-a9 sudo mkdir -p /data/galera_node3
+
+ssh admin@dcos-c1-a7 sudo ls -al /data
+ssh admin@dcos-c1-a8 sudo ls -al /data
+ssh admin@dcos-c1-a9 sudo ls -al /data

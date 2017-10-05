@@ -1,0 +1,23 @@
+
+
+Process for restoring an incremental backup.
+
+# prepare the base
+xtrabackup --prepare --apply-log-only --target-dir=/data/galera-backups/week_NN/base
+
+# prepare all incremental backups but the last with --apply-log-only
+xtrabackup --prepare --apply-log-only --target-dir=/data/galera-backups/week_NN/base \
+--incremental-dir=/data/galera-backups/week_NN/inc1
+
+# then the last as normal
+xtrabackup --prepare --target-dir=/data/galera-backups/week_NN/base \
+--incremental-dir=/data/galera-backups/week_NN/inc2
+
+# Now the base folder is essentially the /var/lib/mysql data folder and 
+# can be copied to any mariadb.
+
+# xtrabackup --copy-back --target-dir=/data/mariadb
+# Note that the full data will always be in the directory of the base backup, as we are 
+# appending the increments to it.
+# xtrabackup --apply-log-only should be used when merging all incrementals except the last one.
+# That’s why the previous line doesn’t contain the xtrabackup --apply-log-only option. Even if the xtrabackup --apply-log-only was used on the last step, backup would still be consistent but in that case server would perform the rollback phase.

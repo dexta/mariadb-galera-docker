@@ -1,0 +1,3 @@
+#!/bin/bash
+
+dcos marathon app update /tier1-galera/galera-dblb < tier1_galera_dblb_update.json

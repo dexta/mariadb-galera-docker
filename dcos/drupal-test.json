@@ -1,0 +1,48 @@
+{
+  "id": "drupal-test",
+  "cpus": 1,
+  "mem": 2048,
+  "instances": 1,
+  "taskKillGracePeriodSeconds": 30,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "idstudios/wecm-drupal7-test:plain",
+      "forcePullImage": true,
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "servicePort": 10200,
+          "hostPort": 0
+        }
+      ]
+    }
+  },
+  "env":{  
+    "DRUPALDB_HOST": "galera-dblb.marathon.l4lb.thisdcos.directory",
+    "DRUPALDB_USER": "root",
+    "DRUPALDB_PASSWORD": "Fender2000",
+    "DRUPALDB_DATABASE": "drupaldb"
+  },  
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 1.0,
+    "maximumOverCapacity": 1.0
+  },  
+  "healthChecks": [{
+      "protocol": "HTTP",
+      "path": "/",
+      "portIndex": 0,
+      "timeoutSeconds": 20,
+      "gracePeriodSeconds": 30,
+      "intervalSeconds": 30,
+      "maxConsecutiveFailures": 5
+  }],
+  "labels":{
+    "HAPROXY_DEPLOYMENT_GROUP":"drupal-proxy",
+    "HAPROXY_DEPLOYMENT_ALT_PORT":"10201",
+    "HAPROXY_GROUP":"external",
+    "HAPROXY_0_REDIRECT_TO_HTTPS":"false",
+    "HAPROXY_0_VHOST": "drupal.idstudios.local"
+  }
+}

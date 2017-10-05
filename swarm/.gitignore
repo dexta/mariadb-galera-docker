@@ -1,0 +1,6 @@
+dockerhost
+api-certs/*.pem
+galera.yml
+.secrets
+
+

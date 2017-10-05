@@ -1,0 +1,20 @@
+#!/bin/bash
+
+bash util/make-data-vols
+
+dcos marathon group add tier1_galera_master.json
+if [ $? -ne 0 ]; then
+  echo "Failure deploying galera-master container instance"
+  exit 1
+fi
+echo "Waiting 90s for the galera master node to come up"
+sleep 90s
+
+dcos marathon app start /tier1-galera/galera-node2 
+dcos marathon app start /tier1-galera/galera-node3
+echo "Waiting 90s for the remaining galera nodes to come up"
+sleep 90s
+
+echo "Starting the load balancer"
+dcos marathon app start /tier1-galera/galera-dblb
+

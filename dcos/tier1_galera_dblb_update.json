@@ -1,0 +1,57 @@
+{
+  "id": "/tier1-galera/galera-dblb",
+  "cpus": 1,
+  "mem": 2048,
+  "instances": 1,
+  "constraints": [
+    ["hostname", "UNLIKE", "192.168.1.80"],
+    ["hostname", "UNLIKE", "192.168.1.81"],    
+    ["hostname", "UNLIKE", "192.168.1.82"]    
+  ], 
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "idstudios/wecm-db-haproxy:dcos",
+      "forcePullImage": true,
+      "network": "USER",
+      "portMappings": [
+        {
+          "containerPort": 3306,
+          "hostPort": 3306,
+          "servicePort": 10075,
+          "protocol": "tcp",
+          "labels": {
+            "VIP_0": "galera-dblb:3306"
+          }
+        }
+      ]
+    }
+  },
+  "env":{  
+    "NODE_ADDRESS": "galera-dblb.marathon.l4lb.thisdcos.directory"    
+  },
+  "ipAddress":{
+    "networkName":"dcos"
+  },
+  "labels":{
+    "HAPROXY_DEPLOYMENT_GROUP":"internal-proxy",
+    "HAPROXY_GROUP":"external",
+    "HAPROXY_0_REDIRECT_TO_HTTPS":"false",
+    "HAPROXY_0_VHOST": "galera.idstudios.local"
+  },      
+  "healthChecks":[
+    {
+      "protocol":"TCP",
+      "port":3306,
+      "gracePeriodSeconds":300,
+      "intervalSeconds":60,
+      "timeoutSeconds":20,
+      "maxConsecutiveFailures":3
+    }
+  ],
+  "maxLaunchDelaySeconds": 3600,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 0,
+    "maximumOverCapacity": 0
+  }
+}

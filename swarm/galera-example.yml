@@ -1,0 +1,12 @@
+docker-host: demo-swarm-m1
+docker-port: 2376
+
+galera-node1: demo-swarm-w1
+galera-node2: demo-swarm-w2
+galera-node3: demo-swarm-w3
+
+galera-network-name: galera_network
+galera-network: 10.0.9.0/24
+
+ssh-user: admin
+ssh-become: sudo 

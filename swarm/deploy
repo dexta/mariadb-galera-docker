@@ -1,0 +1,109 @@
+#!/bin/bash
+
+function show_usage () {
+  echo 
+  echo "Usage: deploy <stack name> [galera yml config file]"
+  echo 
+  echo "Eg: deploy tier1 tier1-galera.yml"
+  echo 
+}
+
+export STACK_NAME=$1
+if [ -z $STACK_NAME ]; then 
+  echo "No stack name specified! Stack name is required."
+  show_usage
+  exit 1
+fi
+
+DB_CONFIG=$2
+[ -z $DB_CONFIG ] && DB_CONFIG=galera.yml
+if [ ! -f $DB_CONFIG ]; then 
+  echo "No galera yml config file specified, and there is no galera.yml in the path."
+  show_usage
+  exit 1
+fi
+
+DOCKER_HOST=`sed -n '/^docker-host:/ {s///p;q;}' galera.yml | xargs`
+GALERA_NODE1=`sed -n '/^galera-node1:/ {s///p;q;}' $DB_CONFIG | xargs`
+GALERA_NODE2=`sed -n '/^galera-node2:/ {s///p;q;}' $DB_CONFIG | xargs`
+GALERA_NODE3=`sed -n '/^galera-node3:/ {s///p;q;}' $DB_CONFIG | xargs`
+
+GALERA_NETWORK=`sed -n '/^galera-network:/ {s///p;q;}' $DB_CONFIG | xargs`
+GALERA_NETWORK_NAME=`sed -n '/^galera-network-name:/ {s///p;q;}' $DB_CONFIG | xargs`
+
+SSH_USER=`sed -n '/^ssh-user:/ {s///p;q;}' $DB_CONFIG | xargs`
+SSH_BECOME=`sed -n '/^ssh-become:/ {s///p;q;}' $DB_CONFIG | xargs`
+
+[ -z $GALERA_NETWORK ] && GALERA_NETWORK=10.0.9.0/24
+[ -z $GALERA_NETWORK_NAME ] && GALERA_NETWORK_NAME=galera_network
+[ -z $SSH_USER ] && SSH_USER=admin 
+[ -z $SSH_BECOME ] && SSH_USER=sudo 
+
+XTRABACKUP_PWD=` cat .secrets/xtrabackup_password`
+MYSQL_PWD=` cat .secrets/mysql_password`
+MYSQL_ROOT_PWD=` cat .secrets/mysql_root_password`
+
+echo
+echo "Deploying Galera Stack: ${STACK_NAME}"
+echo
+echo "Stack Configuration:"
+echo "--------------------"
+echo "Host Node 1: ${GALERA_NODE1}"
+echo "Host Node 2: ${GALERA_NODE2}"
+echo "Host Node 3: ${GALERA_NODE3}"
+echo "---------------------"
+echo "SSH User: ${SSH_USER}, Become: ${SSH_BECOME}"
+echo
+echo "Creating host node data volumes..."
+echo "----------------------------------"
+ssh $SSH_USER@$GALERA_NODE1 "${SSH_BECOME} bash -s -- " < util/make-data-vol 1
+ssh $SSH_USER@$GALERA_NODE2 "${SSH_BECOME} bash -s -- " < util/make-data-vol 2
+ssh $SSH_USER@$GALERA_NODE3 "${SSH_BECOME} bash -s -- " < util/make-data-vol 3
+echo "Deploying the cluster network: ${GALERA_NETWORK_NAME} ${GALERA_NETWORK} ..."
+./docker-env network create --driver overlay --subnet $GALERA_NETWORK $GALERA_NETWORK_NAME
+echo
+echo "Deploying the ${STACK_NAME} MariaDB Galera cluster..."
+
+./docker-env stack deploy -c stacks/mariadb-galera.yml $STACK_NAME
+if [ $? -ne 0 ]; then
+  echo "Failure deploying mariadb galera master stack"
+  exit 1
+fi
+echo "Waiting 60s for the galera master node to start up"
+sleep 60s
+
+./docker-env service scale ${STACK_NAME}_galera-node2=1
+./docker-env service scale ${STACK_NAME}_galera-node3=1
+if [ $? -ne 0 ]; then
+  echo "Failure scaling up remaining galera-node containers"
+  exit 1
+fi
+echo "Waiting 120s for the galera worker nodes to start up"
+sleep 120s
+
+./docker-env stack deploy -c stacks/mariadb-galera-nodify-master.yml $STACK_NAME
+if [ $? -ne 0 ]; then
+  echo "Failure nodifying the master galera instance with the node command"
+  exit 1
+fi
+echo "Waiting 90s for the galera master to nodify (it might take 2 or more cycles)"
+sleep 90s
+
+./docker-env service scale ${STACK_NAME}_galera-haproxy=1
+echo "Waiting 30s for the galera haproxy to startup"
+sleep 30s
+
+echo
+echo "Galera WSREP Cluster Info:"
+echo "--------------------------"
+mysql -h $DOCKER_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/cluster-info.sql
+if [ $? -ne 0 ]; then
+  echo
+  echo "Failure deploying mariadb galera!"
+else
+  echo
+  echo "MariaDB Galera Cluster: ${STACK_NAME} Successfully deployed!"
+fi
+
+
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker build -t idstudios/mariadb-galera-backup:latest .
+docker push idstudios/mariadb-galera-backup:latest

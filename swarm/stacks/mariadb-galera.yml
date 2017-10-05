@@ -1,0 +1,83 @@
+version: '3.2'
+
+services:
+  galera-node1:
+    image: idstudios/mariadb-galera-docker
+    deploy:
+      placement:
+        constraints: [node.labels.db-galera-node-1 == true]
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - MYSQL_USER=drupal
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - MYSQL_DATABASE=drupaldb
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - NODE_ADDRESS=eth0
+    command: seed
+    volumes:
+      - /data/galera_node1:/var/lib/mysql    
+    ports:
+      - 3310:3306
+    secrets:
+      - xtrabackup_password
+      - mysql_password
+      - mysql_root_password
+
+  galera-node2:
+    image: idstudios/mariadb-galera-swarm
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - NODE_ADDRESS=eth0
+      - HEALTHY_WHILE_BOOTING=1
+    command: node ${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node3
+    volumes:
+      - /data/galera_node2:/var/lib/mysql    
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [node.labels.db-galera-node-2 == true]
+    secrets:
+      - xtrabackup_password
+
+  galera-node3:
+    image: idstudios/mariadb-galera-swarm
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - NODE_ADDRESS=eth0
+      - HEALTHY_WHILE_BOOTING=1
+    command: node ${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2
+    volumes:
+      - /data/galera_node3:/var/lib/mysql    
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [node.labels.db-galera-node-3 == true]
+    secrets:
+      - xtrabackup_password
+
+  galera-haproxy:
+    image: idstudios/mariadb-galera-haproxy:latest
+    ports:
+      - 3306:3306
+    environment:
+      - HAPROXY_GALERA_NODE_1=${STACK_NAME}_galera-node1:3306
+      - HAPROXY_GALERA_NODE_2=${STACK_NAME}_galera-node2:3306
+      - HAPROXY_GALERA_NODE_3=${STACK_NAME}_galera-node3:3306
+    deploy:
+      mode: replicated
+      replicas: 0
+
+networks:
+    default:
+        external:
+            name: galera-network
+
+secrets:
+  xtrabackup_password:
+    file: .secrets/xtrabackup_password
+  mysql_password:
+    file: .secrets/mysql_password
+  mysql_root_password:
+    file: .secrets/mysql_root_password

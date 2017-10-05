@@ -1,0 +1,99 @@
+{
+  "id": "/tier1-galera/galera-node1",
+  "cpus": 1,
+  "mem": 1584,
+  "instances": 1,
+  "args": [
+    "node",
+    "galera-node2.marathon.l4lb.thisdcos.directory,galera-node3.marathon.l4lb.thisdcos.directory"
+  ],
+  "constraints": [["hostname", "LIKE", "192.168.1.80"]], 
+  "container": {
+    "type": "DOCKER",
+    "volumes": [
+      {
+        "containerPath": "/var/lib/mysql",
+        "hostPath": "/data/galera_node1",
+        "mode": "RW"
+      }
+    ],
+    "docker": {
+      "image": "idstudios/mariadb-galera-swarm:dcos",
+      "forcePullImage": true,
+      "network": "USER",
+      "portMappings": [
+        {
+          "containerPort": 3306,
+          "hostPort": 0,
+          "protocol": "tcp",
+          "labels": {
+            "VIP_0": "galera-node1:3306"
+          }
+        },
+        {
+          "containerPort": 3309,
+          "hostPort": 3309,
+          "servicePort": 3309,              
+          "protocol": "tcp",
+          "labels": {
+            "VIP_1": "galera-node1:3309"
+          }
+        },
+        {
+          "containerPort": 4567,
+          "hostPort": 4567,
+          "servicePort": 4567,              
+          "protocol": "tcp",
+          "labels": {
+            "VIP_2": "galera-node1:4567"
+          }
+        },            
+        {
+          "containerPort": 4568,
+          "hostPort": 4568,
+          "servicePort": 4568,              
+          "protocol": "tcp",
+          "labels": {
+            "VIP_3": "galera-node1:4568"
+          }
+        },            
+        {
+          "containerPort": 4444,
+          "hostPort": 4444,
+          "servicePort": 4444,              
+          "protocol": "tcp",
+          "labels": {
+            "VIP_4": "galera-node1:4444"
+          }
+        }            
+                    
+      ]
+    }
+  },
+  "env":{  
+    "XTRABACKUP_PASSWORD": "Fender2000",
+    "NODE_ADDRESS": "galera-node1.marathon.l4lb.thisdcos.directory"    
+  },
+  "ipAddress":{
+    "networkName":"dcos"
+  },
+  "healthChecks":[
+    {
+      "protocol":"TCP",
+      "port":3306,
+      "gracePeriodSeconds":300,
+      "intervalSeconds":60,
+      "timeoutSeconds":20,
+      "maxConsecutiveFailures":3,
+      "ignoreHttp1xx":false
+    }
+  ],
+  "labels": {
+    "MARATHON_SINGLE_INSTANCE_APP": "true"
+  },
+  "maxLaunchDelaySeconds": 3600,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 0,
+    "maximumOverCapacity": 0
+  }
+}

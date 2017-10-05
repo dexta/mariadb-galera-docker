@@ -1,0 +1,40 @@
+version: '3.2'
+
+services:
+  db-backup:
+    image: idstudios/mariadb-galera-backup:latest
+    environment:
+      - PERCONA_BACKUP_HOST_FILE=/run/secrets/db-backup-xtrabackup_host
+      - PERCONA_BACKUP_USER_FILE=/run/secrets/db-backup-xtrabackup_user
+      - PERCONA_BACKUP_PASSWORD_FILE=/run/secrets/db-backup-xtrabackup_password
+      - RETENTION_PERIOD_FILE=/run/secrets/db-backup-xtrabackup_retention
+    volumes:
+      - /data/logs/backups:/var/log/cron
+      - /data/galera_node1:/var/lib/mysql    
+      - /data/galera-backups:/target    
+    command: cron
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.labels.db-galera-node-1 == true]
+    secrets:
+      - db-backup-xtrabackup_host
+      - db-backup-xtrabackup_user
+      - db-backup-xtrabackup_password
+      - db-backup-xtrabackup_retention
+
+networks:
+    default:
+        external:
+            name: galera-network
+
+secrets:
+  db-backup-xtrabackup_password:
+    file: .secrets/xtrabackup_password
+  db-backup-xtrabackup_host:
+    file: .secrets/xtrabackup_host
+  db-backup-xtrabackup_user:
+    file: .secrets/xtrabackup_user
+  db-backup-xtrabackup_retention:
+    file: .secrets/xtrabackup_retention

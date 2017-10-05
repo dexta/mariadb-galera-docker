@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker build -t idstudios/mariadb-galera-haproxy:latest .
+docker push idstudios/mariadb-galera-haproxy:latest

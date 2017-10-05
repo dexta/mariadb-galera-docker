@@ -1,0 +1,360 @@
+{
+  "id": "/tier1-galera",
+  "apps": [
+    {
+      "id": "/tier1-galera/galera-node1",
+      "cpus": 1,
+      "mem": 1584,
+      "instances": 1,
+      "args": ["seed"],
+      "constraints": [["hostname", "LIKE", "192.168.1.80"]], 
+      "container": {
+        "type": "DOCKER",
+        "volumes": [
+          {
+            "containerPath": "/var/lib/mysql",
+            "hostPath": "/data/galera_node1",
+            "mode": "RW"
+          }
+        ],
+        "docker": {
+          "image": "idstudios/mariadb-galera-swarm:dcos",
+          "forcePullImage": true,
+          "network": "USER",
+          "portMappings": [
+            {
+              "containerPort": 3306,
+              "hostPort": 0,
+              "protocol": "tcp",
+              "labels": {
+                "VIP_0": "galera-node1:3306"
+              }
+            },
+            {
+              "containerPort": 3309,
+              "hostPort": 3309,
+              "servicePort": 3309,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_1": "galera-node1:3309"
+              }
+            },
+            {
+              "containerPort": 4567,
+              "hostPort": 4567,
+              "servicePort": 4567,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_2": "galera-node1:4567"
+              }
+            },            
+            {
+              "containerPort": 4568,
+              "hostPort": 4568,
+              "servicePort": 4568,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_3": "galera-node1:4568"
+              }
+            },            
+            {
+              "containerPort": 4444,
+              "hostPort": 4444,
+              "servicePort": 4444,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_4": "galera-node1:4444"
+              }
+            }            
+                        
+          ]
+        }
+      },
+      "env":{  
+        "XTRABACKUP_PASSWORD": "Fender2000",
+        "MYSQL_USER": "drupal",
+        "MYSQL_PASSWORD": "Fender2000",
+        "MYSQL_DATABASE": "drupaldb",
+        "MYSQL_ROOT_PASSWORD": "Fender2000",
+        "NODE_ADDRESS": "galera-node1.marathon.l4lb.thisdcos.directory"    
+      },
+      "ipAddress":{
+        "networkName":"dcos"
+      },
+      "healthChecks":[
+        {
+          "protocol":"TCP",
+          "port":3306,
+          "gracePeriodSeconds":300,
+          "intervalSeconds":60,
+          "timeoutSeconds":20,
+          "maxConsecutiveFailures":3,
+          "ignoreHttp1xx":false
+        }
+      ],
+      "labels": {
+        "MARATHON_SINGLE_INSTANCE_APP": "true"
+      },
+      "maxLaunchDelaySeconds": 3600,
+      "upgradeStrategy": {
+        "minimumHealthCapacity": 0,
+        "maximumOverCapacity": 0
+      }
+    },
+    {
+      "id": "/tier1-galera/galera-node2",
+      "cpus": 1,
+      "mem": 1584,
+      "instances": 0,
+      "args": [
+        "node",
+         "galera-node1.marathon.l4lb.thisdcos.directory,galera-node3.marathon.l4lb.thisdcos.directory"
+      ],
+      "constraints": [["hostname", "LIKE", "192.168.1.81"]], 
+      "container": {
+        "type": "DOCKER",
+        "volumes": [
+          {
+            "containerPath": "/var/lib/mysql",
+            "hostPath": "/data/galera_node2",
+            "mode": "RW"
+          }
+        ],
+        "docker": {
+          "image": "idstudios/mariadb-galera-swarm:dcos",
+          "forcePullImage": true,
+          "network": "USER",
+          "portMappings": [
+            {
+              "containerPort": 3306,
+              "hostPort": 0,
+              "protocol": "tcp",
+              "labels": {
+                "VIP_0": "galera-node2:3306"
+              }
+            },
+            {
+              "containerPort": 3309,
+              "hostPort": 3309,
+              "servicePort": 3309,
+              "protocol": "tcp",
+              "labels": {
+                "VIP_1": "galera-node2:3309"
+              }
+            },            
+            {
+              "containerPort": 4567,
+              "hostPort": 4567,
+              "servicePort": 4567,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_2": "galera-node2:4567"
+              }
+            },
+            {
+              "containerPort": 4568,
+              "hostPort": 4568,
+              "servicePort": 4568,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_3": "galera-node2:4568"
+              }
+            },            
+            {
+              "containerPort": 4444,
+              "hostPort": 4444,
+              "servicePort": 4444,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_4": "galera-node2:4444"
+              }
+            }            
+                                    
+          ]
+        }
+      },
+      "env":{  
+        "XTRABACKUP_PASSWORD": "Fender2000",
+        "NODE_ADDRESS": "galera-node2.marathon.l4lb.thisdcos.directory"    
+      },
+      "ipAddress":{
+        "networkName":"dcos"
+      },
+      "healthChecks":[
+        {
+          "protocol":"TCP",
+          "port":3306,
+          "gracePeriodSeconds":300,
+          "intervalSeconds":60,
+          "timeoutSeconds":20,
+          "maxConsecutiveFailures":3,
+          "ignoreHttp1xx":false
+        }
+      ],
+      "labels": {
+        "MARATHON_SINGLE_INSTANCE_APP": "true"
+      },
+      "maxLaunchDelaySeconds": 3600,
+      "upgradeStrategy": {
+        "minimumHealthCapacity": 0,
+        "maximumOverCapacity": 0
+      }
+    },
+    {
+      "id": "/tier1-galera/galera-node3",
+      "cpus": 1,
+      "mem": 1584,
+      "instances": 0,
+      "args": [
+        "node",
+        "galera-node1.marathon.l4lb.thisdcos.directory,galera-node2.marathon.l4lb.thisdcos.directory"
+      ],
+      "constraints": [["hostname", "LIKE", "192.168.1.82"]], 
+      "container": {
+        "type": "DOCKER",
+        "volumes": [
+          {
+            "containerPath": "/var/lib/mysql",
+            "hostPath": "/data/galera_node3",
+            "mode": "RW"
+          }
+        ],
+        "docker": {
+          "image": "idstudios/mariadb-galera-swarm:dcos",
+          "forcePullImage": true,
+          "network": "USER",
+          "portMappings": [
+            {
+              "containerPort": 3306,
+              "hostPort": 0,
+              "protocol": "tcp",
+              "labels": {
+                "VIP_0": "galera-node3:3306"
+              }
+            },
+            {
+              "containerPort": 3309,
+              "hostPort": 3309,
+              "servicePort": 3309,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_1": "galera-node3:3309"
+              }
+            },         
+            {
+              "containerPort": 4567,
+              "hostPort": 4567,
+              "servicePort": 4567,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_2": "galera-node3:4567"
+              }
+            },
+            {
+              "containerPort": 4568,
+              "hostPort": 4568,
+              "servicePort": 4568,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_3": "galera-node3:4568"
+              }
+            },            
+            {
+              "containerPort": 4444,
+              "hostPort": 4444,
+              "servicePort": 4444,              
+              "protocol": "tcp",
+              "labels": {
+                "VIP_4": "galera-node3:4444"
+              }
+            }            
+                        
+          ]
+        }
+      },
+      "env":{  
+        "XTRABACKUP_PASSWORD": "Fender2000",
+        "NODE_ADDRESS": "galera-node3.marathon.l4lb.thisdcos.directory"    
+      },
+      "ipAddress":{
+        "networkName":"dcos"
+      },
+      "healthChecks":[
+        {
+          "protocol":"TCP",
+          "port":3306,
+          "gracePeriodSeconds":300,
+          "intervalSeconds":60,
+          "timeoutSeconds":20,
+          "maxConsecutiveFailures":3,
+          "ignoreHttp1xx":false
+        }
+      ],
+      "labels": {
+        "MARATHON_SINGLE_INSTANCE_APP": "true"
+      },
+      "maxLaunchDelaySeconds": 3600,
+      "upgradeStrategy": {
+        "minimumHealthCapacity": 0,
+        "maximumOverCapacity": 0
+      }
+    },
+    {
+      "id": "/tier1-galera/galera-dblb",
+      "cpus": 1,
+      "mem": 2048,
+      "instances": 0,
+      "constraints": [
+        ["hostname", "UNLIKE", "192.168.1.80"],
+        ["hostname", "UNLIKE", "192.168.1.81"],    
+        ["hostname", "UNLIKE", "192.168.1.82"]    
+      ], 
+      "container": {
+        "type": "DOCKER",
+        "docker": {
+          "image": "idstudios/wecm-db-haproxy:dcos",
+          "forcePullImage": true,
+          "network": "USER",
+          "portMappings": [
+            {
+              "containerPort": 3306,
+              "hostPort": 3306,
+              "servicePort": 3306,
+              "protocol": "tcp",
+              "labels": {
+                "VIP_0": "galera-dblb:3306"
+              }
+            }
+          ]
+        }
+      },
+      "env":{  
+        "NODE_ADDRESS": "galera-dblb.marathon.l4lb.thisdcos.directory"    
+      },
+      "ipAddress":{
+        "networkName":"dcos"
+      },
+      "labels":{
+        "HAPROXY_DEPLOYMENT_GROUP":"internal-proxy",
+        "HAPROXY_GROUP":"external",
+        "HAPROXY_0_REDIRECT_TO_HTTPS":"false",
+        "HAPROXY_0_VHOST": "galera.idstudios.local"
+      },      
+      "healthChecks":[
+        {
+          "protocol":"TCP",
+          "port":3306,
+          "gracePeriodSeconds":300,
+          "intervalSeconds":60,
+          "timeoutSeconds":20,
+          "maxConsecutiveFailures":3
+        }
+      ],
+      "maxLaunchDelaySeconds": 3600,
+      "upgradeStrategy": {
+        "minimumHealthCapacity": 0,
+        "maximumOverCapacity": 0
+      }
+    }
+  ]
+}

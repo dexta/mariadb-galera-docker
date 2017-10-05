@@ -1,0 +1,40 @@
+{
+  "id": "db-control",
+  "cpus": 1,
+  "mem": 2048,
+  "instances": 1,
+  "constraints": [
+    ["hostname", "UNLIKE", "192.168.1.80"],
+    ["hostname", "UNLIKE", "192.168.1.81"],    
+    ["hostname", "UNLIKE", "192.168.1.82"]    
+  ], 
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "idstudios/wecm-db-control",
+      "forcePullImage": true,
+      "network": "USER"
+    }
+  },
+  "env":{  
+    "MYSQL_ROOT_PASSWORD":"Fender2000"
+  },  
+  "ipAddress":{
+    "networkName":"dcos"
+  },
+  "healthChecks":[
+    {
+      "protocol":"TCP",
+      "port":3306,
+      "gracePeriodSeconds":300,
+      "intervalSeconds":60,
+      "timeoutSeconds":20,
+      "maxConsecutiveFailures":3
+    }
+  ],
+  "maxLaunchDelaySeconds": 3600,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 0,
+    "maximumOverCapacity": 0
+  }
+}
