@@ -7,6 +7,6 @@ This is a containerized version of a MariaDB Galera cluster.  It makes use of sh
 
 It currently works in both Docker Swarm and DC/OS using the same Docker images.
 
-See the [dcos](./dcos/README.md) README for instructions on deploying to DC/OS.
+See the [dcos](./dcos) README for instructions on deploying to DC/OS.
 
-See the [swarm](./swarm/README.md) README for instructions on deploying to Docker Swarm.
+See the [swarm](./swarm) README for instructions on deploying to Docker Swarm.
