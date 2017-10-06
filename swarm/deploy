@@ -36,8 +36,6 @@ SSH_BECOME=`sed -n '/^ssh-become:/ {s///p;q;}' $DB_CONFIG | xargs`
 
 [ -z $GALERA_NETWORK ] && GALERA_NETWORK=10.0.9.0/24
 [ -z $GALERA_NETWORK_NAME ] && GALERA_NETWORK_NAME=galera_network
-[ -z $SSH_USER ] && SSH_USER=admin 
-[ -z $SSH_BECOME ] && SSH_USER=sudo 
 
 XTRABACKUP_PWD=` cat .secrets/xtrabackup_password`
 MYSQL_PWD=` cat .secrets/mysql_password`

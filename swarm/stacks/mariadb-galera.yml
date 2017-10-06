@@ -72,7 +72,7 @@ services:
 networks:
     default:
         external:
-            name: galera-network
+            name: ${GALERA_NETWORK_NAME}
 
 secrets:
   xtrabackup_password:
