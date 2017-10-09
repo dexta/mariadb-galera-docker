@@ -70,9 +70,14 @@ services:
       replicas: 0
 
 networks:
-    default:
-        external:
-            name: ${GALERA_NETWORK_NAME}
+
+networks:
+  galera_network:
+    external:
+      name: ${GALERA_NETWORK_NAME}
+  default:
+      external:
+          name: galera_network
 
 secrets:
   xtrabackup_password:

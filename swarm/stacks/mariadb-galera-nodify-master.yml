@@ -18,9 +18,12 @@ services:
       - xtrabackup_password
 
 networks:
-    default:
-        external:
-            name: ${GALERA_NETWORK_NAME}
+  galera_network:
+    external:
+      name: ${GALERA_NETWORK_NAME}
+  default:
+      external:
+          name: galera_network
 
 secrets:
   xtrabackup_password:
