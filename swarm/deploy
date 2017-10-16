@@ -83,12 +83,14 @@ mysql -h $DB_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/
 if [ $? -ne 0 ]; then
   echo
   echo "Failure deploying mariadb galera!"
+  echo
 else
   echo "Closing 3306 on the galera haproxy... use db-open and db-close scripts for data loading"
   ./docker-env service update --detach --publish-rm 3306 ${STACK_NAME}_galera-haproxy
   sleep 10s
   echo
   echo "MariaDB Galera Cluster: ${STACK_NAME} Successfully deployed!"
+  echo
 fi
 
 

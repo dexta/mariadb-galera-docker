@@ -14,6 +14,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+echo
 echo "Exposing 3306 on the galera haproxy for data load"
 ./docker-env service update --detach --publish-add 3306:3306 ${STACK_NAME}_galera-haproxy
 echo "Waiting 30s for galera haproxy to reload"
@@ -28,7 +29,9 @@ mysql -h $DB_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/
 if [ $? -ne 0 ]; then
   echo
   echo "Failure deploying mariadb galera!"
+  echo
 else
   echo
   echo "MariaDB Galera Cluster: ${STACK_NAME} Successfully opened for data loading!"
+  echo
 fi
