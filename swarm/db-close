@@ -16,4 +16,5 @@ fi
 
 echo "Closing 3306 on the galera haproxy post data load"
 ./docker-env service update --detach --publish-rm 3306 ${STACK_NAME}_galera-haproxy
+echo "Waiting 10s for galera haproxy to reload"
 sleep 10s

@@ -6,23 +6,19 @@ Automated deployment of the docker based MariaDB Galera cluster into Docker Swar
 
 - The service name for the galera-haproxy service is the entry point, so if the stack is named "tier1", then the address of the MariaDB cluster for mysql clients is: __tier1_galera-haproxy:3306__.  This is how other containers should connect to MariaDB.
 
-## Setup
-
-Configuration details have been distilled into a simple YAML configuration file that is read by the BASH script that co-ordinates the stages of deploying a 3 node cluster.
-
-- Copy the __galera-example.yml__ configuration script to __galera.yml__ for the default configuration that works with [cluster-builder](https://github.com/ids/cluster-builder) demo swarms.
-- Copy the __sample-secrets__ folder to __.secrets__ and adjust the values as required
-- Copy the __api-certs__ for the target cluster into the __api-certs__ folder and validate you can connect.
+> All custom YAML files should be stored in the __deploys__ folder.  These will be ignored by the source repo and should be managed by the user.
 
 To test connection to the Swarm and validate the __api-certs__:
 
-    bash ./docker-env info
+    DOCKER_HOST=<swarm manager> && ./docker-env info
+
+> The DOCKER_HOST value is derrived from the custom YAML configuration file during deployment.  To test using the __docker-env__ script the DOCKER_HOST value must be manually set.
 
 The basic command to deploy is:
 
     bash deploy <stack name> [galera configuration yml file name]
 
-When no configuration file is supplied, it looks in the current path for a __galera.yml__ file.
+When no configuration file is supplied, it looks in the __deploys__ folder for a __galera.yml__ file.
 
 Eg.
 
@@ -31,7 +27,6 @@ Eg.
 ## YAML Configuration File Syntax
     
     docker-host: The manager node with remote api enabled
-    docker-port: The manager port (default: 2376)
 
     galera-node1: The dns name of the swarm node hosting node 1 of the galera cluster
     galera-node2: The dns name of the swarm node hosting node 2 of the galera cluster
@@ -45,8 +40,7 @@ Eg.
 
 __Eg.__
 
-    docker-host: demo-swarm-m1
-    docker-port: 2376
+    docker-host: demo-swarm-m1:2376
 
     galera-node1: demo-swarm-w1
     galera-node2: demo-swarm-w2
@@ -57,4 +51,19 @@ __Eg.__
 
     ssh-user: admin
     ssh-become: sudo
+
+
+## Data Loading
+
+The default configuration closes all external access to MariaDB Cluster.  Only services running within the swarm can access the DB HAPROXY.  To enable easy data loading there are two scripts that toggle exposing the DB HAPROXY via port publishing 3306 externally.
+
+To prepare the database for data loading / external access:
+
+    bash db-open <stack name> [galera YML configuration file]
+
+This will enable external __mysql__ access.
+
+When data loading is complete, external access can be closed again:
+
+    bash db-close <stack name> [galera YML configuration file]
 

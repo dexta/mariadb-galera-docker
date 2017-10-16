@@ -14,19 +14,13 @@ if [ ! -f ./api-certs/cert.pem ]; then
   exit 1
 fi
 
-if [ ! -f galera.yml ]; then 
+if [ -z $DOCKER_HOST ]; then 
   echo 
-  echo "No galera.yml file exists in the current directory"
-  echo "See the example galera.yml.example for details."
+  echo "DOCKER_HOST is not set"
+  echo "Make sure to set the DOCKER_HOST env variable to your swarm manager."
   exit 1
 fi
 
-DOCKER_PORT=`sed -n '/^docker-port:/ {s///p;q;}' galera.yml | xargs`
-if [ -z $DOCKER_PORT ]; then
-  DOCKER_PORT=2376
-fi
-
-export DOCKER_HOST=`sed -n '/^docker-host:/ {s///p;q;}' galera.yml | xargs`:$DOCKER_PORT
 export DOCKER_CERT_PATH=./api-certs
 export DOCKER_TLS_VERIFY=1
 

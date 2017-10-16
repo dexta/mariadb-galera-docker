@@ -5,14 +5,13 @@ if [ -z $STACK_NAME ]; then
   exit 1
 fi
 
-export DB_CONFIG=$2
-[ -z $DB_CONFIG ] && DB_CONFIG=galera.yml
+export DB_CONFIG=./deploys/$2
 if [ ! -f $DB_CONFIG ]; then 
-  echo "No galera yml config file specified, and there is no galera.yml in the path."
+  echo "The galera yml config file was unspecified or not found in the 'deploys' folder."
   exit 1
 fi
 
-export DOCKER_HOST=`sed -n '/^docker-host:/ {s///p;q;}' galera.yml | xargs`
+export DOCKER_HOST=`sed -n '/^docker-host:/ {s///p;q;}' $DB_CONFIG | xargs`
 export GALERA_NODE1=`sed -n '/^galera-node1:/ {s///p;q;}' $DB_CONFIG | xargs`
 export GALERA_NODE2=`sed -n '/^galera-node2:/ {s///p;q;}' $DB_CONFIG | xargs`
 export GALERA_NODE3=`sed -n '/^galera-node3:/ {s///p;q;}' $DB_CONFIG | xargs`

@@ -16,12 +16,15 @@ fi
 
 echo "Exposing 3306 on the galera haproxy for data load"
 ./docker-env service update --detach --publish-add 3306:3306 ${STACK_NAME}_galera-haproxy
+echo "Waiting 30s for galera haproxy to reload"
 sleep 30s
+
+DB_HOST=`echo $DOCKER_HOST | sed 's/:.*//'`
 
 echo
 echo "Galera WSREP Cluster Info:"
 echo "--------------------------"
-mysql -h $DOCKER_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/cluster-info.sql
+mysql -h $DB_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/cluster-info.sql
 if [ $? -ne 0 ]; then
   echo
   echo "Failure deploying mariadb galera!"

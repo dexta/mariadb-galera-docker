@@ -53,8 +53,8 @@ fi
 echo "Waiting 60s for the galera master node to start up"
 sleep 60s
 
-./docker-env service scale --detach ${STACK_NAME}_galera-node2=1
-./docker-env service scale --detach ${STACK_NAME}_galera-node3=1
+./docker-env service scale ${STACK_NAME}_galera-node2=1
+./docker-env service scale ${STACK_NAME}_galera-node3=1
 if [ $? -ne 0 ]; then
   echo "Failure scaling up remaining galera-node containers"
   exit 1
@@ -70,14 +70,16 @@ fi
 echo "Waiting 90s for the galera master to nodify (it might take 2 or more cycles)"
 sleep 90s
 
-./docker-env service scale --detach ${STACK_NAME}_galera-haproxy=1
+./docker-env service scale ${STACK_NAME}_galera-haproxy=1
 echo "Waiting 30s for the galera haproxy to startup"
 sleep 30s
+
+DB_HOST=`echo $DOCKER_HOST | sed 's/:.*//'`
 
 echo
 echo "Galera WSREP Cluster Info:"
 echo "--------------------------"
-mysql -h $DOCKER_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/cluster-info.sql
+mysql -h $DB_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/cluster-info.sql
 if [ $? -ne 0 ]; then
   echo
   echo "Failure deploying mariadb galera!"

@@ -1,5 +1,4 @@
-docker-host: demo-swarm-m1
-docker-port: 2376
+docker-host: demo-swarm-m1:2376
 
 galera-node1: demo-swarm-w1
 galera-node2: demo-swarm-w2
