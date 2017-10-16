@@ -16,8 +16,6 @@ services:
     command: seed
     volumes:
       - /data/galera_node1:/var/lib/mysql    
-    ports:
-      - 3310:3306
     secrets:
       - xtrabackup_password
       - mysql_password

@@ -12,8 +12,6 @@ services:
     command: node ${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
     volumes:
       - /data/galera_node1:/var/lib/mysql    
-    ports:
-      - 3310:3306
     secrets:
       - xtrabackup_password
 

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+function show_usage () {
+  echo 
+  echo "Usage: db-open <stack name> [galera yml config file]"
+  echo 
+  echo "Eg: db-open tier1 tier1-galera.yml"
+  echo 
+}
+
+source ./conf $1 $2
+if [ $? -ne 0 ]; then
+  show_usage
+  exit 1
+fi
+
+echo "Exposing 3306 on the galera haproxy for data load"
+./docker-env service update --detach --publish-add 3306:3306 ${STACK_NAME}_galera-haproxy
+sleep 30s
+
+echo
+echo "Galera WSREP Cluster Info:"
+echo "--------------------------"
+mysql -h $DOCKER_HOST  -u root --password=`cat .secrets/mysql_root_password` < util/cluster-info.sql
+if [ $? -ne 0 ]; then
+  echo
+  echo "Failure deploying mariadb galera!"
+else
+  echo
+  echo "MariaDB Galera Cluster: ${STACK_NAME} Successfully opened for data loading!"
+fi
