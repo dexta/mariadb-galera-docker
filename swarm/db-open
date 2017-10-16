@@ -2,7 +2,7 @@
 
 function show_usage () {
   echo 
-  echo "Usage: db-open <stack name> [galera yml config file]"
+  echo "Usage: db-open <stack name> <galera yml config file>"
   echo 
   echo "Eg: db-open tier1 tier1-galera.yml"
   echo 

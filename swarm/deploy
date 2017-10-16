@@ -2,7 +2,7 @@
 
 function show_usage () {
   echo 
-  echo "Usage: deploy <stack name> [galera yml config file]"
+  echo "Usage: deploy <stack name> <galera yml config file>"
   echo 
   echo "Eg: deploy tier1 tier1-galera.yml"
   echo 
