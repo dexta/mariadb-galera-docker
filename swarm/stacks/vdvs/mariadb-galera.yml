@@ -5,7 +5,7 @@ services:
     image: idstudios/mariadb-galera-docker
     deploy:
       placement:
-        constraints: [node.labels.db-galera-node-1 == true]
+        constraints: [node.labels.front-end != true]
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - MYSQL_USER=drupal
@@ -15,7 +15,7 @@ services:
       - NODE_ADDRESS=eth0
     command: seed
     volumes:
-      - /data/galera_node1:/var/lib/mysql    
+      - galera-node1-volume:/var/lib/mysql    
     secrets:
       - xtrabackup_password
       - mysql_password
@@ -29,12 +29,12 @@ services:
       - HEALTHY_WHILE_BOOTING=1
     command: node ${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node3
     volumes:
-      - /data/galera_node2:/var/lib/mysql    
+      - galera-node2-volume:/var/lib/mysql    
     deploy:
       mode: replicated
       replicas: 0
       placement:
-        constraints: [node.labels.db-galera-node-2 == true]
+        constraints: [node.labels.front-end != true]
     secrets:
       - xtrabackup_password
 
@@ -46,12 +46,12 @@ services:
       - HEALTHY_WHILE_BOOTING=1
     command: node ${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2
     volumes:
-      - /data/galera_node3:/var/lib/mysql    
+      - galera-node3-volume:/var/lib/mysql    
     deploy:
       mode: replicated
       replicas: 0
       placement:
-        constraints: [node.labels.db-galera-node-3 == true]
+        constraints: [node.labels.front-end != true]
     secrets:
       - xtrabackup_password
 
@@ -66,6 +66,18 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+
+volumes:
+  galera-node1-volume:
+    external: 
+      name: ${STACK_NAME}_galera-node1-volume
+  galera-node2-volume:
+    external: 
+      name: ${STACK_NAME}_galera-node2-volume
+  galera-node3-volume:
+    external: 
+      name: ${STACK_NAME}_galera-node3-volume
+
 
 networks:
   galera_network:

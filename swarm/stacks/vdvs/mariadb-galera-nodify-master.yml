@@ -1,0 +1,33 @@
+version: '3.2'
+
+services:
+  galera-node1:
+    image: idstudios/mariadb-galera-docker
+    deploy:
+      placement:
+        constraints: [node.labels.front-end != true]
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - NODE_ADDRESS=eth0
+    command: node ${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
+    volumes:
+      - galera-node1-volume:/var/lib/mysql    
+    secrets:
+      - xtrabackup_password
+
+volumes:
+  galera-node1-volume:
+    external: 
+      name: ${STACK_NAME}_galera-node1-volume
+
+networks:
+  galera_network:
+    external:
+      name: ${GALERA_NETWORK_NAME}
+  default:
+      external:
+          name: galera_network
+
+secrets:
+  xtrabackup_password:
+    file: .secrets/xtrabackup_password
