@@ -44,7 +44,7 @@ if [ "$USE_VDVS" == "true" ]; then
     if [ ! -z HOST_NODE_DATASTORE ]; then
       HOST_VOL_NAME=${HOST_VOL_NAME}@${HOST_NODE_DATASTORE}
     fi
-    echo "Creating the ${HOST_NODE_VOL_SIZE} nDVS volume for the galera node ${i} ..."
+    echo "Creating the ${HOST_NODE_VOL_SIZE} vDVS volume for the galera node ${i} ..."
     ./docker-env volume create --driver=vsphere --name=$HOST_VOL_NAME -o size=${HOST_NODE_VOL_SIZE}
   done
   echo 
