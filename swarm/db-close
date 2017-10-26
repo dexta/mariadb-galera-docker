@@ -2,13 +2,13 @@
 
 function show_usage () {
   echo 
-  echo "Usage: db-close <stack name> <galera yml config file>"
+  echo "Usage: db-close <galera yml config file>"
   echo 
-  echo "Eg: db-close tier1 tier1-galera.yml"
+  echo "Eg: db-close tier1-galera.yml"
   echo 
 }
 
-source ./conf $1 $2
+source ./conf $1
 if [ $? -ne 0 ]; then
   show_usage
   exit 1

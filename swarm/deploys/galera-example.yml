@@ -1,6 +1,7 @@
 docker-host: demo-swarm-m1:2376
+docker-host-cert-path: "./api-certs/demo-swarm-m1"
 
-use-ndvs: true
+stack-name: tier1
 
 galera-node1: demo-swarm-w1
 galera-node2: demo-swarm-w2

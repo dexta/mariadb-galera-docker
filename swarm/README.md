@@ -8,25 +8,29 @@ Automated deployment of the docker based MariaDB Galera cluster into Docker Swar
 
 > All custom YAML files should be stored in the __deploys__ folder.  These will be ignored by the source repo and should be managed by the user.
 
-To test connection to the Swarm and validate the __api-certs__:
+To test connection to the Swarm and validate the __api-certs__, load the configuration YAML file and run the docker-env wrapper script:
 
-    DOCKER_HOST=<swarm manager> && ./docker-env info
+    source ./conf <galera configuration yml file name>
+    ./docker-env info
 
-> The DOCKER_HOST value is derrived from the custom YAML configuration file during deployment.  To test using the __docker-env__ script the DOCKER_HOST value must be manually set.
+> The DOCKER_HOST and DOCKER_CERT_PATH values are derrived from the custom YAML configuration file during deployment.  This is to ensure there is no accidental deployment to the wrong DOCKER environment.  To test using the __docker-env__ script the environment values must be manually loaded via the __conf__ script.
 
 The basic command to deploy is:
 
-    bash deploy <stack name> [galera configuration yml file name]
+    bash deploy <galera configuration yml file name>
 
 When no configuration file is supplied, it looks in the __deploys__ folder for a __galera.yml__ file.
 
 Eg.
 
-    bash deploy tier1 tier1_galera.yml
+    bash deploy tier1_galera.yml
 
 ## YAML Configuration File Syntax
     
     docker-host: The manager node with remote api enabled
+    docker-host-cert-path: The location of the docker remote api certificates
+
+    stack-name: the name of the service stack deployment
 
     galera-node1: The dns name of the swarm node hosting node 1 of the galera cluster
     galera-node2: The dns name of the swarm node hosting node 2 of the galera cluster
@@ -41,6 +45,9 @@ Eg.
 __Eg.__
 
     docker-host: demo-swarm-m1:2376
+    docker-host-cert-path: "./api-certs/demo-swarm-m1"
+
+    stack-name: tier1
 
     galera-node1: demo-swarm-w1
     galera-node2: demo-swarm-w2
@@ -59,11 +66,11 @@ The default configuration closes all external access to MariaDB Cluster.  Only s
 
 To prepare the database for data loading / external access:
 
-    bash db-open <stack name> [galera YML configuration file]
+    bash db-open <galera YML configuration file>
 
 This will enable external __mysql__ access.
 
 When data loading is complete, external access can be closed again:
 
-    bash db-close <stack name> [galera YML configuration file]
+    bash db-close <galera YML configuration file>
 

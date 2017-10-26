@@ -1,7 +1,7 @@
 version: '3.2'
 
 services:
-  galera-node1:
+  galera-seed:
     image: idstudios/mariadb-galera-docker
     deploy:
       placement:
@@ -15,6 +15,26 @@ services:
       - NODE_ADDRESS=eth0
     command: seed
     volumes:
+      - galera-seed-volume:/var/lib/mysql    
+    secrets:
+      - xtrabackup_password
+      - mysql_password
+      - mysql_root_password
+
+  galera-node1:
+    image: idstudios/mariadb-galera-docker
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [node.labels.front-end != true]
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - NODE_ADDRESS=eth0
+      - HEALTHY_WHILE_BOOTING=1
+      - GCOMM_MINIMUM=2
+    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
+    volumes:
       - galera-node1-volume:/var/lib/mysql    
     secrets:
       - xtrabackup_password
@@ -27,7 +47,8 @@ services:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
       - HEALTHY_WHILE_BOOTING=1
-    command: node ${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node3
+      - GCOMM_MINIMUM=2
+    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
     volumes:
       - galera-node2-volume:/var/lib/mysql    
     deploy:
@@ -44,7 +65,8 @@ services:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
       - HEALTHY_WHILE_BOOTING=1
-    command: node ${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2
+      - GCOMM_MINIMUM=2
+    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
     volumes:
       - galera-node3-volume:/var/lib/mysql    
     deploy:
@@ -68,15 +90,18 @@ services:
       replicas: 0
 
 volumes:
+  galera-seed-volume:
+    external: 
+      name: ${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE}
   galera-node1-volume:
     external: 
-      name: ${STACK_NAME}_galera-node1-volume
+      name: ${STACK_NAME}_galera-node1-volume@${HOST_NODE_DATASTORE}
   galera-node2-volume:
     external: 
-      name: ${STACK_NAME}_galera-node2-volume
+      name: ${STACK_NAME}_galera-node2-volume@${HOST_NODE_DATASTORE}
   galera-node3-volume:
     external: 
-      name: ${STACK_NAME}_galera-node3-volume
+      name: ${STACK_NAME}_galera-node3-volume@${HOST_NODE_DATASTORE}
 
 
 networks:

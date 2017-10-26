@@ -2,13 +2,13 @@
 
 function show_usage () {
   echo 
-  echo "Usage: deploy <stack name> <galera yml config file>"
+  echo "Usage: deploy <galera yml config file>"
   echo 
-  echo "Eg: deploy tier1 tier1-galera.yml"
+  echo "Eg: deploy tier1-galera.yml"
   echo 
 }
 
-source ./conf $1 $2
+source ./conf $1
 if [ $? -ne 0 ]; then
   show_usage
   exit 1
@@ -24,11 +24,13 @@ XTRABACKUP_PWD=` cat .secrets/xtrabackup_password`
 MYSQL_PWD=` cat .secrets/mysql_password`
 MYSQL_ROOT_PWD=` cat .secrets/mysql_root_password`
 
+echo "Deploying the cluster network: ${GALERA_NETWORK_NAME} ${GALERA_NETWORK} ..."
+./docker-env network create --driver overlay --subnet $GALERA_NETWORK $GALERA_NETWORK_NAME
+echo
+echo "Deploying the MariaDB Galera ${STACK_NAME} cluster..."
+
 export STACK_FOLDER=stacks
 
-echo
-echo "Deploying Galera Stack: ${STACK_NAME}"
-echo
 if [ "$USE_VDVS" == "true" ]; then
 
   echo "vDVS Data Volume Configuration:"
@@ -36,8 +38,10 @@ if [ "$USE_VDVS" == "true" ]; then
 
   HOST_NODE_VOL_SIZE=`sed -n '/^host-node-volume-size:/ {s///p;q;}' $DB_CONFIG | xargs`
   [ -z $HOST_NODE_VOL_SIZE ] && HOST_NODE_VOL_SIZE=128gb
-  HOST_NODE_DATASTORE=`sed -n '/^host-node-datastore:/ {s///p;q;}' $DB_CONFIG | xargs`
+  export HOST_NODE_DATASTORE=`sed -n '/^host-node-datastore:/ {s///p;q;}' $DB_CONFIG | xargs`
 
+  echo "Creating the ${HOST_NODE_VOL_SIZE} vDVS seed volume for the galera cluster ..."
+  ./docker-env volume create --driver=vsphere --name=${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE} -o size=${HOST_NODE_VOL_SIZE}
   for i in `seq 1 3`
   do
     HOST_VOL_NAME=${STACK_NAME}_galera-node${i}-volume
@@ -45,13 +49,45 @@ if [ "$USE_VDVS" == "true" ]; then
       HOST_VOL_NAME=${HOST_VOL_NAME}@${HOST_NODE_DATASTORE}
     fi
     echo "Creating the ${HOST_NODE_VOL_SIZE} vDVS volume for the galera node ${i} ..."
-    ./docker-env volume create --driver=vsphere --name=$HOST_VOL_NAME -o size=${HOST_NODE_VOL_SIZE}
+    ./docker-env volume create --driver=vsphere --name=$HOST_VOL_NAME -o size=${HOST_NODE_VOL_SIZE} -o fstype=ext4
   done
   echo 
 
   STACK_FOLDER=${STACK_FOLDER}/vdvs
 
+  echo "MariaDB Galera Service Configuration:"
+  echo "-------------------------------------"
+
+  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
+  if [ $? -ne 0 ]; then
+    echo "Failure deploying mariadb galera master stack"
+    exit 1
+  fi
+  echo "Waiting 2m for the galera seed node to start up"
+  sleep 120s
+
+  ./docker-env service scale ${STACK_NAME}_galera-node1=1
+  ./docker-env service scale ${STACK_NAME}_galera-node2=1
+  ./docker-env service scale ${STACK_NAME}_galera-node3=1
+  if [ $? -ne 0 ]; then
+    echo "Failure scaling up remaining galera-node containers"
+    exit 1
+  fi
+  echo "Waiting 4m for galera nodes 1, 2 & 3 to start up"
+  sleep 240s
+
+  echo "Scaling down seed node"
+  ./docker-env service scale ${STACK_NAME}_galera-seed=0
+  sleep 10s
+  echo "Removing seed node vDVS volume"
+  ./docker-env volume rm ${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE}
+  sleep 30s
+  echo "Removing seed node"
+  ./docker-env service rm ${STACK_NAME}_galera-seed
+  sleep 10s
+
 else 
+
   echo "Host Data Stack Configuration:"
   echo "------------------------------"
   echo "Host Node 1: ${GALERA_NODE1}"
@@ -65,37 +101,33 @@ else
   ssh $SSH_USER@$GALERA_NODE1 "${SSH_BECOME} bash -s -- " < util/make-data-vol 1
   ssh $SSH_USER@$GALERA_NODE2 "${SSH_BECOME} bash -s -- " < util/make-data-vol 2
   ssh $SSH_USER@$GALERA_NODE3 "${SSH_BECOME} bash -s -- " < util/make-data-vol 3
-fi
 
-echo "Deploying the cluster network: ${GALERA_NETWORK_NAME} ${GALERA_NETWORK} ..."
-./docker-env network create --driver overlay --subnet $GALERA_NETWORK $GALERA_NETWORK_NAME
-echo
-echo "Deploying the MariaDB Galera ${STACK_NAME} cluster..."
+  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
+  if [ $? -ne 0 ]; then
+    echo "Failure deploying mariadb galera master stack"
+    exit 1
+  fi
+  echo "Waiting 90s for the galera seed node to start up"
+  sleep 90s
 
-./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
-if [ $? -ne 0 ]; then
-  echo "Failure deploying mariadb galera master stack"
-  exit 1
-fi
-echo "Waiting 90s for the galera master node to start up"
-sleep 90s
+  ./docker-env service scale ${STACK_NAME}_galera-node2=1
+  ./docker-env service scale ${STACK_NAME}_galera-node3=1
+  if [ $? -ne 0 ]; then
+    echo "Failure scaling up remaining galera-node containers"
+    exit 1
+  fi
+  echo "Waiting 3m for galera nodes 2 & 3 to start up"
+  sleep 180ss
 
-./docker-env service scale ${STACK_NAME}_galera-node2=1
-./docker-env service scale ${STACK_NAME}_galera-node3=1
-if [ $? -ne 0 ]; then
-  echo "Failure scaling up remaining galera-node containers"
-  exit 1
+  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera-nodify-master.yml $STACK_NAME
+  if [ $? -ne 0 ]; then
+    echo "Failure nodifying the master galera instance with the node command"
+    exit 1
+  fi
+  echo "Waiting 90s for the galera master to nodify (it might take 2 or more cycles)"
+  sleep 90s
+  
 fi
-echo "Waiting 120s for the galera worker nodes to start up"
-sleep 120s
-
-./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera-nodify-master.yml $STACK_NAME
-if [ $? -ne 0 ]; then
-  echo "Failure nodifying the master galera instance with the node command"
-  exit 1
-fi
-echo "Waiting 90s for the galera master to nodify (it might take 2 or more cycles)"
-sleep 90s
 
 ./docker-env service scale ${STACK_NAME}_galera-haproxy=1
 echo "Waiting 30s for the galera haproxy to startup"
