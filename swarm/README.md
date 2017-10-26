@@ -10,20 +10,20 @@ Automated deployment of the docker based MariaDB Galera cluster into Docker Swar
 
 To test connection to the Swarm and validate the __api-certs__, load the configuration YAML file and run the docker-env wrapper script:
 
-    source ./conf <galera configuration yml file name>
+    source ./conf <galera configuration YAML>
     ./docker-env info
 
 > The DOCKER_HOST and DOCKER_CERT_PATH values are specified in the custom YAML configuration file and then used during deployment.  This is to ensure there is no accidental deployment to the wrong DOCKER environment.  To test using the __docker-env__ script the environment values must be manually loaded via the __conf__ script.
 
 The basic command to deploy is:
 
-    bash deploy <galera configuration YML>
+    bash deploy <galera configuration YAML>
 
-When no configuration file is supplied, it looks in the __deploys__ folder for a __galera.yml__ file.
+When no configuration file is supplied, it looks in the __deploys__ folder for a __galera.YAML__ file.
 
 Eg.
 
-    bash deploy tier1_galera.yml
+    bash deploy tier1_galera.YAML
 
 ## YAML Configuration File Syntax
     
@@ -66,11 +66,11 @@ The default configuration closes all external access to MariaDB Cluster.  Only s
 
 To prepare the database for data loading / external access:
 
-    bash db-open <galera configuration YML>
+    bash db-open <galera configuration YAML>
 
 This will enable external __mysql__ access.
 
 When data loading is complete, external access can be closed again:
 
-    bash db-close <galera configuration YML>
+    bash db-close <galera configuration YAML>
 
