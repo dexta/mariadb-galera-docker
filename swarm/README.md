@@ -19,11 +19,9 @@ The basic command to deploy is:
 
     bash deploy <galera configuration YAML>
 
-When no configuration file is supplied, it looks in the __deploys__ folder for a __galera.YAML__ file.
-
 Eg.
 
-    bash deploy tier1_galera.YAML
+    bash deploy tier1_galera.yml
 
 ## YAML Configuration File Syntax
     
