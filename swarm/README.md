@@ -1,6 +1,6 @@
-MariaDB Galera Swarm
-====================
-Automated deployment of the docker based MariaDB Galera cluster into Docker Swarm.
+MariaDB Galera Docker
+=====================
+Automated deployment of the docker based MariaDB Galera cluster into Docker CE or EE.
 
 ## Notes
 
