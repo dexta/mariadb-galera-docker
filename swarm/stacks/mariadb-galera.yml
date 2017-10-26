@@ -22,7 +22,7 @@ services:
       - mysql_root_password
 
   galera-node2:
-    image: idstudios/mariadb-galera-swarm
+    image: idstudios/mariadb-galera-docker
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
@@ -39,7 +39,7 @@ services:
       - xtrabackup_password
 
   galera-node3:
-    image: idstudios/mariadb-galera-swarm
+    image: idstudios/mariadb-galera-docker
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0

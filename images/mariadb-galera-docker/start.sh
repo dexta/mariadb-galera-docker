@@ -88,24 +88,6 @@ echo "NODE_ADDRESS=$NODE_ADDRESS"
 echo "waiting 5 seconds for dns"
 sleep 5
 
-# try until DNS is ready
-members=""
-digs=""
-
-for i in {1..20}
-do
-	digs=`dig +short ${NODE_ADDRESS}`
-	if [ -z "$digs" ]; then
-		echo "no DNS record found for $NODE_ADDRESS"
-	else
-		break
-	fi
-   sleep 2
-done
-
-echo "RESOLVED NODE IP: $digs"
-NODE_ADDRESS=$digs
-
 #
 # Read optional secrets from files
 #
