@@ -1,3 +1,0 @@
-#!/bin/bash
-
-cp ../../../../IDStudios/cluster-builder/client-certs/$1/*.pem ./

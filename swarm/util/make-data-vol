@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ ! -d /data/galera_node$1 ]; then
-  mkdir -p /data/galera_node$1
+DATA_FOLDER=/data
+if [ ! -d $DATA_FOLDER/galera_node$1 ]; then
+  mkdir -p $DATA_FOLDER/galera_node$1
 fi
-rm -rf /data/galera_node$1/*
-echo "Galera data volume on host node: `hostname`:"
-ls /data
-echo
+rm -rf $DATA_FOLDER/galera_node$1/*
+echo -n "Galera data volume on host node: `hostname`: ${DATA_FOLDER}/"
+ls $DATA_FOLDER

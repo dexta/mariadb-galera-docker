@@ -1,5 +1,6 @@
 dockerhost
-api-certs/*.pem
+api-certs/**
+!api-certs/README.md
 galera.yml
 .secrets
 deploys/**
