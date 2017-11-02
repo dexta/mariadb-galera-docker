@@ -61,6 +61,13 @@ if [ "$TRACE" = "y" ]; then
 	set -x
 fi
 
+set -m
+LISTEN_PORT=3309
+tmpfile=$(mktemp -t socat.XXXX)
+echo "Starting socat server for self: ${NODE_ADDRESS}:${LISTEN_PORT}"
+socat -u TCP-LISTEN:$LISTEN_PORT,bind=0.0.0.0,fork OPEN:$tmpfile,append &
+PID_SERVER=$!
+
 if [[ "$OPT" =~ --wsrep-new-cluster ]]
 then
 	# --wsrep-new-cluster is used for the "seed" command so no recovery used
@@ -141,7 +148,6 @@ else
 	else
 		# Communicate to other nodes to find if there is a Primary Component and if not
 		# figure out who has the highest recovery position to be the bootstrapper
-		LISTEN_PORT=3309
 		EXPECT_NODES=3 # Ideally we have a three-node cluster. This will be adjusted down to 2 later
 
 		if [[ -f /var/lib/mysql/gvwstate.dat ]]
@@ -162,12 +168,6 @@ else
 		# If no healthy node is running then collect uuid:seqno from other nodes and
 		# use them to determine which node should do the bootstrap
 		echo "${LOG_MESSAGE} Collecting grastate.dat and gvwstate.dat info from other nodes..."
-		set -m
-		tmpfile=$(mktemp -t socat.XXXX)
-		echo "Starting socat server for self: ${NODE_ADDRESS}:${LISTEN_PORT}"
-		socat -u TCP-LISTEN:$LISTEN_PORT,bind=0.0.0.0,fork OPEN:$tmpfile,append &
-		PID_SERVER=$!
-
 		# Send state data to other nodes - every 5 seconds for 3 minutes or until all nodes reached
 		SENT_NODES=''
 		echo "Sending socats to peers..."
