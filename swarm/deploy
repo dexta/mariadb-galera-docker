@@ -116,8 +116,8 @@ else
     exit 1
   fi
   echo
-  echo "Waiting 90s for the galera seed node to start up"
-  sleep 90s
+  echo "Waiting 120s for the galera seed node to start up"
+  sleep 120s
 
   ./docker-env service scale ${STACK_NAME}_galera-node2=1
   ./docker-env service scale ${STACK_NAME}_galera-node3=1
@@ -126,8 +126,8 @@ else
     exit 1
   fi
   echo
-  echo "Waiting 3m for galera nodes 2 & 3 to start up"
-  sleep 180ss
+  echo "Waiting 4m for galera nodes 2 & 3 to start up"
+  sleep 240s
 
   ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera-nodify-master.yml $STACK_NAME
   if [ $? -ne 0 ]; then
@@ -135,8 +135,8 @@ else
     exit 1
   fi
   echo
-  echo "Waiting 90s for the galera master to nodify (it might take 2 or more cycles)"
-  sleep 90s
+  echo "Waiting 120s for the galera master to nodify (it might take 2 or more cycles)"
+  sleep 120s
   
 fi
 

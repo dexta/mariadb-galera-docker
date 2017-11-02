@@ -312,8 +312,6 @@ galera-healthcheck -user=system -password="$SYSTEM_PASSWORD" \
 	-availWhenReadOnly=true \
 	-pidfile=/var/run/galera-healthcheck-2.pid >/dev/null &
 
-chown -R mysql:mysql /var/lib/mysql
-
 gosu mysql mysqld.sh --console \
 	$MYSQL_MODE_ARGS \
 	--wsrep_cluster_name=$CLUSTER_NAME \
