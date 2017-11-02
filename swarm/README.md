@@ -13,7 +13,7 @@ For __Docker EE__ built with cluster-builder, the certificates must be downloade
 
 ## Notes
 
-- The service name for the galera-haproxy service is the entry point, so if the stack is named "tier1", then the address of the MariaDB cluster for mysql clients is: __tier1_galera-haproxy:3306__.  This is how other containers should connect to MariaDB.
+The service name for the galera-haproxy service is the entry point, so if the stack is named "tier1", then the address of the MariaDB cluster for mysql clients is: __tier1_galera-haproxy:3306__.  This is how other containers should connect to MariaDB.
 
 > All custom YAML files should be stored in the __deploys__ folder.  These will be ignored by the source repo and should be managed by the user.
 
