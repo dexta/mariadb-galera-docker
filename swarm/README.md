@@ -2,6 +2,15 @@ MariaDB Galera Docker
 =====================
 Automated deployment of the docker based MariaDB Galera cluster into Docker CE or EE.
 
+## Requirements
+
+The deployment assumes you have a cluster with remote API enabled, and that you have the certificates required to connect.  For example, a cluster built with [cluster-builder](https://github.com/ids/cluster-builder).
+
+For __Docker CE__ built with cluster-builder, the certificates are stored in the deployment package folder (located in __clusters__), and the certificates are placed within the __api-certs__ folder.  The YAML configuration file discussed below would need a relative or absolute path to this folder.
+
+For __Docker EE__ built with cluster-builder, the certificates must be downloaded through the UCP Web UI. The download package can be extracted, and within it will be the required certificates. The YAML configuration file discussed below would need a relative or absolute path to this folder.
+
+
 ## Notes
 
 - The service name for the galera-haproxy service is the entry point, so if the stack is named "tier1", then the address of the MariaDB cluster for mysql clients is: __tier1_galera-haproxy:3306__.  This is how other containers should connect to MariaDB.
@@ -13,7 +22,7 @@ To test connection to the Swarm and validate the __api-certs__, load the configu
     source ./conf <galera configuration YAML>
     ./docker-env info
 
-> The DOCKER_HOST and DOCKER_CERT_PATH values are specified in the custom YAML configuration file and then used during deployment.  This is to ensure there is no accidental deployment to the wrong DOCKER environment.  To test using the __docker-env__ script the environment values must be manually loaded via the __conf__ script.
+> The DOCKER_HOST and DOCKER_CERT_PATH values specified in the custom YAML configuration file are  used for deployment.  This is to ensure there is no accidental deployment to the wrong DOCKER environment.  To test using the __docker-env__ script the environment values must be manually loaded via the __conf__ script.
 
 The basic command to deploy is:
 
