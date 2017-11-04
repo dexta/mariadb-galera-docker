@@ -24,3 +24,6 @@ fi
 
 export GALERA_NETWORK=`sed -n '/^galera-network:/ {s///p;q;}' $DB_CONFIG | xargs`
 export GALERA_NETWORK_NAME=`sed -n '/^galera-network-name:/ {s///p;q;}' $DB_CONFIG | xargs`
+
+export APP_NETWORK=`sed -n '/^app-network:/ {s///p;q;}' $DB_CONFIG | xargs`
+export APP_NETWORK_NAME=`sed -n '/^app-network-name:/ {s///p;q;}' $DB_CONFIG | xargs`

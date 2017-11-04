@@ -26,14 +26,19 @@ SSH_USER=`sed -n '/^ssh-user:/ {s///p;q;}' $DB_CONFIG | xargs`
 SSH_BECOME=`sed -n '/^ssh-become:/ {s///p;q;}' $DB_CONFIG | xargs`
 
 [ -z $GALERA_NETWORK ] && GALERA_NETWORK=10.0.9.0/24
-[ -z $GALERA_NETWORK_NAME ] && GALERA_NETWORK_NAME=galera_network
+[ -z $GALERA_NETWORK_NAME ] && GALERA_NETWORK_NAME=data_network
+
+[ -z $APP_NETWORK ] && GALERA_NETWORK=10.0.13.0/24
+[ -z $APP_NETWORK_NAME ] && GALERA_NETWORK_NAME=web_network
 
 XTRABACKUP_PWD=` cat .secrets/xtrabackup_password`
 MYSQL_PWD=` cat .secrets/mysql_password`
 MYSQL_ROOT_PWD=` cat .secrets/mysql_root_password`
 
-echo -n "Deploying the cluster network: ${GALERA_NETWORK_NAME} ${GALERA_NETWORK}: "
+echo -n "Deploying the galera cluster network: ${GALERA_NETWORK_NAME} ${GALERA_NETWORK}: "
 ./docker-env network create --driver overlay --subnet $GALERA_NETWORK $GALERA_NETWORK_NAME
+echo -n "Deploying the app/proxy network: ${APP_NETWORK_NAME} ${APP_NETWORK}: "
+./docker-env network create --driver overlay --subnet $APP_NETWORK $APP_NETWORK_NAME
 echo
 echo "Deploying the MariaDB Galera ${STACK_NAME} cluster..."
 echo

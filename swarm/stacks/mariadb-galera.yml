@@ -63,6 +63,9 @@ services:
       - HAPROXY_GALERA_NODE_1=${STACK_NAME}_galera-node1:3306
       - HAPROXY_GALERA_NODE_2=${STACK_NAME}_galera-node2:3306
       - HAPROXY_GALERA_NODE_3=${STACK_NAME}_galera-node3:3306
+    networks:
+      - app_network
+      - galera_network
     deploy:
       mode: replicated
       replicas: 0
@@ -71,9 +74,12 @@ networks:
   galera_network:
     external:
       name: ${GALERA_NETWORK_NAME}
+  app_network:
+    external:
+      name: ${APP_NETWORK_NAME}
   default:
       external:
-          name: galera_network
+          name: ${GALERA_NETWORK_NAME}
 
 secrets:
   xtrabackup_password:

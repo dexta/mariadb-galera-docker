@@ -21,7 +21,7 @@ networks:
       name: ${GALERA_NETWORK_NAME}
   default:
       external:
-          name: galera_network
+          name: ${GALERA_NETWORK_NAME}
 
 secrets:
   xtrabackup_password:
