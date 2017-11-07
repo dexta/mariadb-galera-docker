@@ -3,6 +3,9 @@ docker-host-cert-path: "./api-certs/demo-swarm-m1"
 
 stack-name: tier1
 
+galera-version: 10.1
+haproxy-version: latest
+
 galera-node1: demo-swarm-w1
 galera-node2: demo-swarm-w2
 galera-node3: demo-swarm-w3
