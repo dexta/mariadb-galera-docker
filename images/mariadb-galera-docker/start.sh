@@ -242,27 +242,26 @@ case $START_MODE in
 			# before trying to start. For example, this occurs when updated container images are being pulled
 			# by `docker service update <service>` or on a full cluster power loss
 			COUNT=$(echo "$GCOMM" | tr ',' "\n" | sort -u | grep -v -e "^$NODE_ADDRESS\$" -e '^$' | wc -l)
-			echo "CURRENT RESOLVING NODE COUNT: ${COUNT}, GCOMM: ${GCOMM}"
-
 			if [ $RESOLVE -eq 1 ] && [ $COUNT -lt $(($GCOMM_MINIMUM)) ]; then
-
 				# Bypass healthcheck so we can keep waiting for other nodes to appear
 				if [[ $HEALTHY_WHILE_BOOTING -eq 1 ]]; then
 					touch /var/lib/mysql/pre-boot.flag
 				fi
 
-				echo "Waiting for at least $GCOMM_MINIMUM IP addresses to resolve..."
 				SLEEPS=$((SLEEPS + 1))
-				sleep 1
+				echo "${SLEEPS}: Resolving Nodes: ${COUNT}, GCOMM: ${GCOMM}"
+				sleep 2s
 			else
 				break
 			fi
 
 			# After 120 seconds reduce GCOMM_MINIMUM
-			if [ $SLEEPS -ge 180 ]; then
-				SLEEPS=0
-				GCOMM_MINIMUM=$((GCOMM_MINIMUM - 1))
-				echo "Reducing GCOMM_MINIMUM to $GCOMM_MINIMUM"
+			if [ $SLEEPS -ge 60 ]; then
+				#SLEEPS=0
+				#GCOMM_MINIMUM=$((GCOMM_MINIMUM - 1))
+				#echo "Reducing GCOMM_MINIMUM to $GCOMM_MINIMUM"
+				echo "Bailing on this container because service name DNS does not seem to be resolving."
+				exit 1
 			fi
 		done
 		# Pre-boot completed

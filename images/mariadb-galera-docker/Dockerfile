@@ -1,4 +1,5 @@
-FROM mariadb:10.1
+ARG imageVer=latest
+FROM mariadb:$imageVer
 
 RUN set -x \
     && apt-get update \

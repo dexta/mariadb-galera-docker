@@ -76,8 +76,14 @@ if [ "$USE_VDVS" == "true" ]; then
     echo "Failure deploying mariadb galera master stack"
     exit 1
   fi
-  echo "Waiting 2m for the galera seed node to start up"
-  sleep 120s
+  echo
+  echo -n "Waiting for the galera seed node to start up..."
+  while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-seed | grep 1/1 | wc -l | xargs`" != "1" ]
+  do
+    echo -n "."
+    sleep 5s
+  done
+  echo
 
   ./docker-env service scale ${STACK_NAME}_galera-node1=1
   ./docker-env service scale ${STACK_NAME}_galera-node2=1
@@ -86,8 +92,17 @@ if [ "$USE_VDVS" == "true" ]; then
     echo "Failure scaling up remaining galera-node containers"
     exit 1
   fi
-  echo "Waiting 4m for galera nodes 1, 2 & 3 to start up"
-  sleep 240s
+  echo
+  echo -n "Waiting for permanent galera nodes to start up..."
+  while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node | grep 1/1 | wc -l | xargs`" != "3" ]
+  do
+    echo -n "."
+    sleep 3s
+  done
+  echo
+  echo "Allocating 1m for the initial cluster data sync..."
+  sleep 60s
+  echo
 
   echo "Scaling down seed node"
   ./docker-env service scale ${STACK_NAME}_galera-seed=0
@@ -112,8 +127,10 @@ else
   echo "Creating host node data volumes..."
   echo "----------------------------------"
   ssh $SSH_USER@$GALERA_NODE1 "${SSH_BECOME} bash -s -- " < util/make-data-vol 1
+  ssh $SSH_USER@$GALERA_NODE1 "${SSH_BECOME} bash -s -- " < util/make-data-vol seed
   ssh $SSH_USER@$GALERA_NODE2 "${SSH_BECOME} bash -s -- " < util/make-data-vol 2
   ssh $SSH_USER@$GALERA_NODE3 "${SSH_BECOME} bash -s -- " < util/make-data-vol 3
+  
   echo
   ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
   if [ $? -ne 0 ]; then
@@ -121,9 +138,15 @@ else
     exit 1
   fi
   echo
-  echo "Waiting 120s for the galera seed node to start up"
-  sleep 120s
+  echo -n "Waiting for the galera seed node to start up..."
+  while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-seed | grep 1/1 | wc -l | xargs`" != "1" ]
+  do
+    echo -n "."
+    sleep 5s
+  done
+  echo
 
+  ./docker-env service scale ${STACK_NAME}_galera-node1=1
   ./docker-env service scale ${STACK_NAME}_galera-node2=1
   ./docker-env service scale ${STACK_NAME}_galera-node3=1
   if [ $? -ne 0 ]; then
@@ -131,23 +154,33 @@ else
     exit 1
   fi
   echo
-  echo "Waiting 4m for galera nodes 2 & 3 to start up"
-  sleep 240s
-
-  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera-nodify-master.yml $STACK_NAME
-  if [ $? -ne 0 ]; then
-    echo "Failure nodifying the master galera instance with the node command"
-    exit 1
-  fi
+  echo -n "Waiting for permanent galera nodes to start up..."
+  while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node | grep 1/1 | wc -l | xargs`" != "3" ]
+  do
+    echo -n "."
+    sleep 3s
+  done
   echo
-  echo "Waiting 120s for the galera master to nodify (it might take 2 or more cycles)"
-  sleep 120s
+
+  echo "Allocating 1m for the initial cluster data sync..."
+  sleep 60s
+  echo
+  
+  ./docker-env service rm ${STACK_NAME}_galera-seed
+  echo
   
 fi
 
 ./docker-env service scale ${STACK_NAME}_galera-haproxy=1
-echo "Waiting 30s for the galera haproxy to startup"
-sleep 30s
+echo -n "Waiting for the galera haproxy to startup..."
+while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-haproxy | grep 1/1 | wc -l | xargs`" != "1" ]
+do
+  echo -n "."
+  sleep 3s
+done
+echo
+
+sleep 5s
 
 DB_HOST=`echo $DOCKER_HOST | sed 's/:.*//'`
 

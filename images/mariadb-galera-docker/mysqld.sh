@@ -61,13 +61,6 @@ if [ "$TRACE" = "y" ]; then
 	set -x
 fi
 
-set -m
-LISTEN_PORT=3309
-tmpfile=$(mktemp -t socat.XXXX)
-echo "Starting socat server for self: ${NODE_ADDRESS}:${LISTEN_PORT}"
-socat -u TCP-LISTEN:$LISTEN_PORT,bind=0.0.0.0,fork OPEN:$tmpfile,append &
-PID_SERVER=$!
-
 if [[ "$OPT" =~ --wsrep-new-cluster ]]
 then
 	# --wsrep-new-cluster is used for the "seed" command so no recovery used
@@ -114,19 +107,19 @@ else
 
 	if [[ -z $POSITION ]]; then
 		echo "${LOG_MESSAGE} --------------------------------------------------"
-		echo "${LOG_MESSAGE} Attempting to recover GTID positon..."
+		echo "${LOG_MESSAGE} Attempting to recover GTID positon: ${POSITION}"
 
-		tmpfile=$(mktemp -t wsrep_recover.XXXXXX)
+		gtidtmpfile=$(mktemp -t wsrep_recover.XXXXXX)
 		mysqld  --wsrep-on=ON \
 				--wsrep_sst_method=skip \
 				--wsrep_cluster_address=gcomm:// \
 				--skip-networking \
-				--wsrep-recover 2> $tmpfile
-		if [ $? -ne 0 ]; then cat $tmpfile; else grep 'WSREP' $tmpfile; fi
+				--wsrep-recover 2> $gtidtmpfile
+		if [ $? -ne 0 ]; then cat $gtidtmpfile; else grep 'WSREP' $gtidtmpfile; fi
 		echo "${LOG_MESSAGE} --------------------------------------------------"
 
-		POSITION=$(sed -n 's/.*WSREP: Recovered position:\s*//p' $tmpfile)
-		rm -f $tmpfile
+		POSITION=$(sed -n 's/.*WSREP: Recovered position:\s*//p' $gtidtmpfile)
+		rm -f $gtidtmpfile
 	fi
 
 	NODE_ADDRESS=$(<<<$OPT sed -E 's#.*--wsrep_node_address=([0-9\.]+):4567.*#\1#')
@@ -149,7 +142,6 @@ else
 		# Communicate to other nodes to find if there is a Primary Component and if not
 		# figure out who has the highest recovery position to be the bootstrapper
 		EXPECT_NODES=3 # Ideally we have a three-node cluster. This will be adjusted down to 2 later
-
 		if [[ -f /var/lib/mysql/gvwstate.dat ]]
 		then
 			# gvwstate.dat is only useful if all nodes have the same view so we will check
@@ -159,11 +151,24 @@ else
 			if [[ $GVW_MEMBERS -gt $EXPECT_NODES ]]; then
 				EXPECT_NODES=$GVW_MEMBERS
 			fi
+
+			echo "Found a gvwstate.dat file!  This node was part of a previous cluster."
+			echo "VIEW_ID: ${VIEW_ID}"
+			echo "GVW_MEMBERS: ${GVW_MEMBERS}"
 		fi
+
 		if [[ $(<<<${GCOMM//,/ } wc -w) -gt $EXPECT_NODES ]]; then
 			EXPECT_NODES=$(<<<${GCOMM//,/ } wc -w)
 		fi
 		EXPECT_NODES=$((EXPECT_NODES - 1)) # Exclude self
+
+		LISTEN_PORT=3309
+		set -m
+		tmpfile=$(mktemp -t socat.XXXX)
+		echo "Starting socat server for self: ${NODE_ADDRESS}:${LISTEN_PORT}"
+		socat -u TCP-LISTEN:$LISTEN_PORT,bind=0.0.0.0,fork,reuseaddr OPEN:$tmpfile,append &
+		PID_SERVER=$!
+		echo "Socat server listening: ${NODE_ADDRESS}:${LISTEN_PORT}..."
 
 		# If no healthy node is running then collect uuid:seqno from other nodes and
 		# use them to determine which node should do the bootstrap
@@ -172,7 +177,7 @@ else
 		SENT_NODES=''
 		echo "Sending socats to peers..."
 		for i in {192..0}; do
-			echo
+
 			for node in ${GCOMM//,/ }; do
 				[[ $node = $NODE_ADDRESS ]] && continue
 				if socat - TCP:$node:$LISTEN_PORT <<< "seqno:$NODE_ADDRESS:$POSITION:$SAFE_TO_BOOTSTRAP"; then
@@ -183,12 +188,13 @@ else
 				fi
 			done
 
+			if [ ! -f $tmpfile ]; then 
+				echo "The tmpfile: ${tmpfile} does not exist!"
+				fatal_error
+			fi
 			#cat $tmpfile
 			RECV_NODES=$(<$tmpfile awk -F: '/^seqno:/{print $2}' | sort -u | wc -w)
 			SEND_NODES=$(<<<$SENT_NODES tr ',' '\n' | sort -u | wc -w)
-			#echo "RECV_NODES: ${RECV_NODES}"
-			#echo "SEND_NODES: ${SEND_NODES}"
-
 
 			if   [[ $EXPECT_NODES -eq $RECV_NODES ]] \
 			  && [[ $EXPECT_NODES -eq  $SEND_NODES ]]
@@ -222,10 +228,12 @@ else
 				echo "${LOG_MESSAGE} Could not communicate with at least $EXPECT_NODES other nodes and no nodes are up... Giving up!"
 				fatal_error
 			fi
-			sleep 2
+			echo -n "."
+			sleep 1
 		done
 		kill $PID_SERVER
 		set +m
+		echo
 
 		# We now have a collection of lines for all *other* running nodes with lines like:
 		#   seqno:<ip>:<uuid>:<seqno>:<safe_to_bootstrap>

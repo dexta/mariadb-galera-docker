@@ -1,4 +1,12 @@
 #!/bin/bash
 
-docker build -t idstudios/mariadb-galera-docker:latest .
+MARIADB_VER=10.1
+docker build --build-arg imageVer=$MARIADB_VER -t idstudios/mariadb-galera-docker:$MARIADB_VER .
+docker push idstudios/mariadb-galera-docker:$MARIADB_VER
+
+docker tag idstudios/mariadb-galera-docker:$MARIADB_VER idstudios/mariadb-galera-docker:latest
 docker push idstudios/mariadb-galera-docker:latest
+
+MARIADB_VER=10.2
+docker build --build-arg imageVer=$MARIADB_VER -t idstudios/mariadb-galera-docker:$MARIADB_VER .
+docker push idstudios/mariadb-galera-docker:$MARIADB_VER

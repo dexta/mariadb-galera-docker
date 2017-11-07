@@ -1,0 +1,39 @@
+#!/bin/bash
+
+function show_usage () {
+  echo 
+  echo "Usage: db-restart <galera yml config file>"
+  echo 
+  echo "Eg: db-restart tier1-galera.yml"
+  echo 
+}
+
+source ./conf $1
+if [ $? -ne 0 ]; then
+  show_usage
+  exit 1
+fi
+if [ ! -f $WEB_CONFIG ]; then 
+  show_usage
+  exit 1
+fi
+if [ -z $STACK_NAME ]; then 
+  show_usage
+  exit 1
+fi
+
+echo
+echo "Shutting down all galera nodes..."
+./docker-env service scale ${STACK_NAME}_galera-node1=0
+./docker-env service scale ${STACK_NAME}_galera-node2=0
+./docker-env service scale ${STACK_NAME}_galera-node3=0
+
+echo "Waiting 20s for galera nodes to shutdown"
+sleep 20s
+echo
+
+echo
+echo "Restarting all galera nodes..."
+./docker-env service scale ${STACK_NAME}_galera-node1=1
+./docker-env service scale ${STACK_NAME}_galera-node2=1
+./docker-env service scale ${STACK_NAME}_galera-node3=1
