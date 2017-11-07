@@ -1,8 +1,8 @@
-version: '3.2'
+version: '3.3'
 
 services:
   galera-seed:
-    image: idstudios/mariadb-galera-docker
+    image: idstudios/mariadb-galera-docker:${GALERA_TAG}
     deploy:
       placement:
         constraints: [node.labels.front-end != true]
@@ -22,7 +22,7 @@ services:
       - mysql_root_password
 
   galera-node1:
-    image: idstudios/mariadb-galera-docker
+    image: idstudios/mariadb-galera-docker:${GALERA_TAG}
     deploy:
       mode: replicated
       replicas: 0
@@ -33,7 +33,7 @@ services:
       - NODE_ADDRESS=eth0
       - HEALTHY_WHILE_BOOTING=1
       - GCOMM_MINIMUM=2
-    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
+    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
     volumes:
       - galera-node1-volume:/var/lib/mysql    
     secrets:
@@ -42,13 +42,13 @@ services:
       - mysql_root_password
 
   galera-node2:
-    image: idstudios/mariadb-galera-docker
+    image: idstudios/mariadb-galera-docker:${GALERA_TAG}
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
       - HEALTHY_WHILE_BOOTING=1
       - GCOMM_MINIMUM=2
-    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
+    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node3
     volumes:
       - galera-node2-volume:/var/lib/mysql    
     deploy:
@@ -60,13 +60,13 @@ services:
       - xtrabackup_password
 
   galera-node3:
-    image: idstudios/mariadb-galera-docker
+    image: idstudios/mariadb-galera-docker:${GALERA_TAG}
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
       - HEALTHY_WHILE_BOOTING=1
       - GCOMM_MINIMUM=2
-    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2,${STACK_NAME}_galera-node3
+    command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2
     volumes:
       - galera-node3-volume:/var/lib/mysql    
     deploy:
@@ -78,13 +78,16 @@ services:
       - xtrabackup_password
 
   galera-haproxy:
-    image: idstudios/mariadb-galera-haproxy:latest
+    image: idstudios/mariadb-galera-haproxy:${HAPROXY_TAG}
     ports:
       - 3306:3306
     environment:
       - HAPROXY_GALERA_NODE_1=${STACK_NAME}_galera-node1:3306
       - HAPROXY_GALERA_NODE_2=${STACK_NAME}_galera-node2:3306
       - HAPROXY_GALERA_NODE_3=${STACK_NAME}_galera-node3:3306
+    networks:
+      - app_network
+      - galera_network
     deploy:
       mode: replicated
       replicas: 0
@@ -108,9 +111,12 @@ networks:
   galera_network:
     external:
       name: ${GALERA_NETWORK_NAME}
+  app_network:
+    external:
+      name: ${APP_NETWORK_NAME}
   default:
       external:
-          name: galera_network
+          name: ${GALERA_NETWORK_NAME}
 
 secrets:
   xtrabackup_password:

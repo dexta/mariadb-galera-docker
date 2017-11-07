@@ -5,4 +5,5 @@ if [ ! -d $DATA_FOLDER/galera_node$1 ]; then
   mkdir -p $DATA_FOLDER/galera_node$1
 fi
 rm -rf $DATA_FOLDER/galera_node$1/*
-echo -n "Galera data volume on host node: `hostname`: ${DATA_FOLDER}/"
+echo "Galera data volume on host node: `hostname`: ${DATA_FOLDER}/galera_node$1"
+

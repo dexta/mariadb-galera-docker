@@ -70,7 +70,9 @@ if [ "$USE_VDVS" == "true" ]; then
 
   echo "MariaDB Galera Service Configuration:"
   echo "-------------------------------------"
-
+  echo
+  echo "Deploying mariadb galera stack..."
+  echo
   ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
   if [ $? -ne 0 ]; then
     echo "Failure deploying mariadb galera master stack"
@@ -85,6 +87,8 @@ if [ "$USE_VDVS" == "true" ]; then
   done
   echo
 
+  echo "Scaling up permanent galera nodes..."
+  echo
   ./docker-env service scale ${STACK_NAME}_galera-node1=1
   ./docker-env service scale ${STACK_NAME}_galera-node2=1
   ./docker-env service scale ${STACK_NAME}_galera-node3=1
@@ -106,13 +110,13 @@ if [ "$USE_VDVS" == "true" ]; then
 
   echo "Scaling down seed node"
   ./docker-env service scale ${STACK_NAME}_galera-seed=0
-  sleep 10s
-  echo "Removing seed node vDVS volume"
-  ./docker-env volume rm ${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE}
-  sleep 30s
-  echo "Removing seed node"
-  ./docker-env service rm ${STACK_NAME}_galera-seed
-  sleep 10s
+  #sleep 10s
+  #echo "Removing seed node vDVS volume"
+  #./docker-env volume rm ${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE}
+  #sleep 30s
+  #echo "Removing seed node"
+  #./docker-env service rm ${STACK_NAME}_galera-seed
+  #sleep 10s
 
 else 
 
@@ -132,6 +136,8 @@ else
   ssh $SSH_USER@$GALERA_NODE3 "${SSH_BECOME} bash -s -- " < util/make-data-vol 3
   
   echo
+  echo "Deploying the mariadb galera stack..."
+  echo
   ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
   if [ $? -ne 0 ]; then
     echo "Failure deploying mariadb galera master stack"
@@ -146,6 +152,8 @@ else
   done
   echo
 
+  echo "Scaling up permanent galera nodes..."
+  echo
   ./docker-env service scale ${STACK_NAME}_galera-node1=1
   ./docker-env service scale ${STACK_NAME}_galera-node2=1
   ./docker-env service scale ${STACK_NAME}_galera-node3=1
@@ -166,11 +174,15 @@ else
   sleep 60s
   echo
   
+  echo "Removing seed node..."
+  echo
   ./docker-env service rm ${STACK_NAME}_galera-seed
   echo
   
 fi
 
+echo "Starting the galera haproxy..."
+echo
 ./docker-env service scale ${STACK_NAME}_galera-haproxy=1
 echo -n "Waiting for the galera haproxy to startup..."
 while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-haproxy | grep 1/1 | wc -l | xargs`" != "1" ]

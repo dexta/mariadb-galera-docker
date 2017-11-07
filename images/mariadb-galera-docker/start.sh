@@ -311,6 +311,10 @@ galera-healthcheck -user=system -password="$SYSTEM_PASSWORD" \
 	-availWhenReadOnly=true \
 	-pidfile=/var/run/galera-healthcheck-2.pid >/dev/null &
 
+# this is here because the VMware Docker Volume Service puts a lost+found directory on its volumes
+# and this messes up SST with a permission denied
+chown -R mysql:mysql /var/lib/mysql
+
 gosu mysql mysqld.sh --console \
 	$MYSQL_MODE_ARGS \
 	--wsrep_cluster_name=$CLUSTER_NAME \
