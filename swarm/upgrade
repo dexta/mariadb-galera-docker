@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function show_usage () {
+  echo 
+  echo "Usage: upgrade <galera yml config file> <galera version tag>"
+  echo 
+  echo "Eg: upgrade galera-demo-centos.yml 10.2"
+  echo 
+}
+
+source ./conf $1
+if [ $? -ne 0 ]; then
+  show_usage
+  exit 1
+fi
+if [ ! -f $WEB_CONFIG ]; then 
+  show_usage
+  exit 1
+fi
+if [ -z $STACK_NAME ]; then 
+  show_usage
+  exit 1
+fi
+
+export GALERA_TAG=$2
+[ ! -z $2 ] && GALERA_TAG=10.2
+
+for i in {1..3}
+do
+  echo
+  echo "Updating galera node $i to ${GALERA_TAG}"
+  ./docker-env service update --detach --image idstudios/mariadb-galera-docker:$GALERA_TAG ${STACK_NAME}_galera-node$i
+  while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node$i | grep 0/1 | wc -l | xargs`" != "1" ]
+  do
+    echo -n "."
+    sleep 3s
+  done
+  echo
+  echo -n "Waiting for the galera node to restart with ${GALERA_TAG}..."
+  while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node$i | grep 1/1 | wc -l | xargs`" != "1" ]
+  do
+    echo -n "."
+    sleep 5s
+  done
+  echo
+  echo "Pausing 1m between upgrades for stablization"
+  sleep 60s
+done
+
+echo "Upgrade Complete!"

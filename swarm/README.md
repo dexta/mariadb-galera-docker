@@ -26,6 +26,11 @@ To test connection to the Swarm and validate the __api-certs__, load the configu
 
 > The UCP bundle includes a file called __env.sh__, and encourages setting the docker context by evaluating this script (eg. __eval $(<env.sh)__).  But this feels too ambiguous an approach for production deployments.  It would be far too easy to forget to setup your environment and end up deploying to the wrong docker context - which could result in a very bad day.  For this reason, the certificates and environment are __explicitly__ specified in the deployment configurations.  It is recommended the naming convention of the YAML deployment configuration files also be explicit to the environment (eg. prod-web-main.yml).  This will hopefully mitigate the risk of accidently pushing a dev deployment into prod because an eval was missed.
 
+__VMware Volume Driver Service__ only works for **Docker 17.09** or greater, which at present is only **Docker CE**... the next release of EE should support it and is coming soon.
+
+
+## Deployment
+
 The basic command to deploy is:
 
     bash deploy <galera configuration YAML>
@@ -68,6 +73,27 @@ __Eg.__
     ssh-user: admin
     ssh-become: sudo
 
+Or to use the __VMware Docker Volume Service__ version:
+
+    docker-host: demo-swarm-m1:2376
+    docker-host-cert-path: "./api-certs/demo-swarm-m1"
+
+    stack-name: tier1
+
+    galera-version: 10.1
+    haproxy-version: latest
+
+    use-vdvs: true
+    host-node-volume-size: 5gb
+    host-node-datastore: san
+
+    galera-network-name: data_network
+    galera-network: 10.0.9.0/24
+
+    app-network-name: web_network
+    app-network: 192.168.42.0/24
+
+> Example configuration files can be found in the deploys folder.
 
 ## Data Loading
 
@@ -75,11 +101,34 @@ The default configuration closes all external access to MariaDB Cluster.  Only s
 
 To prepare the database for data loading / external access:
 
-    bash db-open <galera configuration YAML>
+    bash db-open <galera configuration yml>
 
 This will enable external __mysql__ access.
 
 When data loading is complete, external access can be closed again:
 
-    bash db-close <galera configuration YAML>
+    bash db-close <galera configuration yml>
 
+
+## Simulate Hard Crash Recovery
+
+To immediately scale all nodes to zero, killing the server processes, and then restart them.  Metaphorically pulling the plug on the servers.
+
+> Demonstrates the socat based node information exchange mechanism for auto-assessing the node state and determining the most recent GTID.  Implemented as part of the mysqld.sh custom shim script in the container for galera node coordination.
+
+    bash db-restart <galera configuration yml>
+
+
+## Rolling Upgrade from MariaDB 10.1 to 10.2
+
+The default deployment is based on MariaDB 10.1.  The upgrade script will migrate the cluster to a newer container version, one node at a time, without taking the cluster offline:
+
+    bash upgrade <galera configuration yml> <version tag>
+
+Eg.
+
+    bash upgrade galera-demo-swarm.yml 10.2
+
+This demonstration is even more impressive if you use it with the [drupal7-docker](https://github.com/ids/drupal7-docker) project, as you can validate the site loads both before, during and after the upgrade.
+
+> At the present time only versions 10.1 and 10.2 are implemented.
