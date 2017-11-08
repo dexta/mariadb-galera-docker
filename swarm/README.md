@@ -129,6 +129,6 @@ Eg.
 
     bash upgrade galera-demo-swarm.yml 10.2
 
-This demonstration is even more impressive if you use it with the [drupal7-docker](https://github.com/ids/drupal7-docker) project, as you can validate the site loads both before, during and after the upgrade.
+This demonstration is even more impressive if you use it with the [drupal7-docker](https://github.com/ids/drupal7-docker) project, as you can validate the site loads before, during and after the upgrade.
 
 > At the present time only versions 10.1 and 10.2 are implemented.
