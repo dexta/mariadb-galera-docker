@@ -36,14 +36,14 @@ do
     sleep 3s
   done
   echo
-  echo -n "Waiting for the galera node to restart with ${GALERA_TAG}..."
+  echo -n "Waiting node $i to restart with ${GALERA_TAG}..."
   while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node$i | grep 1/1 | wc -l | xargs`" != "1" ]
   do
     echo -n "."
     sleep 5s
   done
   echo
-  echo "Pausing 1m between upgrades for stablization"
+  echo "Pausing 1m between node upgrades for stablization"
   sleep 60s
 done
 
