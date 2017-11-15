@@ -39,12 +39,33 @@ Eg.
 
     bash deploy tier1_galera.yml
 
+## Private Registry Authentication via the API
+If your images are stored in a private registry that requires authentication, such as gitlab, you have to configure your local docker authorization credentials to pass the HTTP HEADER to the remote API:
+
+1. In the __credentials__ folder, run the __gen-token__ script.
+2. Take the output and add it to your ~/.docker/config.json file on the machine from which you are deploying.
+
+Eg.
+
+    "HttpHeaders": {
+        "X-Registry-Auth": "<HEADER string from above>"
+    }
+
+See https://github.com/docker/docker.github.io/blob/master/swarm/swarm-api.md for details.
+
+> You should then be able to deploy images from the private registry.  The authentication information will be passed via the HTTP HEADER, and then passed on to the worker nodes.
+
 ## YAML Configuration File Syntax
     
     docker-host: The manager node with remote api enabled
     docker-host-cert-path: The location of the docker remote api certificates
 
     stack-name: the name of the service stack deployment
+
+    galera-image: The name of the galera image to use (before the :)
+    galera-tag: The tag/version of the galera image to use (after the :)
+    haproxy-image: The name of the galera haproxy image to use (before the :)
+    haproxy-tag: The tag/version of the galera haproxy image to use (after the :)
 
     galera-node1: The dns name of the swarm node hosting node 1 of the galera cluster
     galera-node2: The dns name of the swarm node hosting node 2 of the galera cluster
@@ -63,6 +84,11 @@ __Eg.__
 
     stack-name: tier1
 
+    galera-image: idstudios/mariadb-galera-docker
+    galera-tag: 10.1
+    haproxy-image: idstudios/mariadb-galera-haproxy
+    haproxy-tag: latest
+
     galera-node1: demo-swarm-w1
     galera-node2: demo-swarm-w2
     galera-node3: demo-swarm-w3
@@ -80,8 +106,10 @@ Or to use the __VMware Docker Volume Service__ version:
 
     stack-name: tier1
 
-    galera-version: 10.1
-    haproxy-version: latest
+    galera-image: idstudios/mariadb-galera-docker
+    galera-tag: 10.1
+    haproxy-image: idstudios/mariadb-galera-haproxy
+    haproxy-tag: latest
 
     use-vdvs: true
     host-node-volume-size: 5gb

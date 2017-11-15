@@ -73,7 +73,7 @@ if [ "$USE_VDVS" == "true" ]; then
   echo
   echo "Deploying mariadb galera stack..."
   echo
-  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
+  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml --with-registry-auth $STACK_NAME
   if [ $? -ne 0 ]; then
     echo "Failure deploying mariadb galera master stack"
     exit 1
@@ -138,7 +138,7 @@ else
   echo
   echo "Deploying the mariadb galera stack..."
   echo
-  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml $STACK_NAME
+  ./docker-env stack deploy -c ${STACK_FOLDER}/mariadb-galera.yml --with-registry-auth $STACK_NAME
   if [ $? -ne 0 ]; then
     echo "Failure deploying mariadb galera master stack"
     exit 1

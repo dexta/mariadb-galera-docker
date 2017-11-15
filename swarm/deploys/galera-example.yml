@@ -3,8 +3,10 @@ docker-host-cert-path: "./api-certs/demo-swarm-m1"
 
 stack-name: tier1
 
-galera-version: 10.1
-haproxy-version: latest
+galera-image: idstudios/mariadb-galera-docker
+galera-tag: 10.1
+haproxy-image: idstudios/mariadb-galera-haproxy
+haproxy-tag: latest
 
 galera-node1: demo-swarm-w1
 galera-node2: demo-swarm-w2
