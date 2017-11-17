@@ -23,7 +23,7 @@ if [ -z $STACK_NAME ]; then
 fi
 
 export GALERA_TAG=$2
-[ ! -z $2 ] && GALERA_TAG=10.2
+[ -z $2 ] && GALERA_TAG=10.2
 
 for i in {1..3}
 do

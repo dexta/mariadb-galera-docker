@@ -314,6 +314,9 @@ galera-healthcheck -user=system -password="$SYSTEM_PASSWORD" \
 # this is here because the VMware Docker Volume Service puts a lost+found directory on its volumes
 # and this messes up SST with a permission denied
 chown -R mysql:mysql /var/lib/mysql
+if [ -d /var/lib/mysql/lost+found ]; then
+	rm -rf /var/lib/mysql/lost+found
+fi
 
 gosu mysql mysqld.sh --console \
 	$MYSQL_MODE_ARGS \
