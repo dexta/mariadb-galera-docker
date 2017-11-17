@@ -89,9 +89,9 @@ if [ "$USE_VDVS" == "true" ]; then
 
   echo "Scaling up permanent galera nodes..."
   echo
-  ./docker-env service scale --detach ${STACK_NAME}_galera-node1=1
-  ./docker-env service scale --detach ${STACK_NAME}_galera-node2=1
-  ./docker-env service scale --detach ${STACK_NAME}_galera-node3=1
+  ./docker-env service scale ${STACK_NAME}_galera-node1=1
+  ./docker-env service scale ${STACK_NAME}_galera-node2=1
+  ./docker-env service scale ${STACK_NAME}_galera-node3=1
   if [ $? -ne 0 ]; then
     echo "Failure scaling up remaining galera-node containers"
     exit 1
@@ -109,7 +109,7 @@ if [ "$USE_VDVS" == "true" ]; then
   echo
 
   echo "Scaling down seed node"
-  ./docker-env service scale --detach ${STACK_NAME}_galera-seed=0
+  ./docker-env service scale ${STACK_NAME}_galera-seed=0
   #sleep 10s
   #echo "Removing seed node vDVS volume"
   #./docker-env volume rm ${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE}
@@ -154,9 +154,9 @@ else
 
   echo "Scaling up permanent galera nodes..."
   echo
-  ./docker-env service scale --detach ${STACK_NAME}_galera-node1=1
-  ./docker-env service scale --detach ${STACK_NAME}_galera-node2=1
-  ./docker-env service scale --detach ${STACK_NAME}_galera-node3=1
+  ./docker-env service scale ${STACK_NAME}_galera-node1=1
+  ./docker-env service scale ${STACK_NAME}_galera-node2=1
+  ./docker-env service scale ${STACK_NAME}_galera-node3=1
   if [ $? -ne 0 ]; then
     echo "Failure scaling up remaining galera-node containers"
     exit 1
@@ -183,7 +183,7 @@ fi
 
 echo "Starting the galera haproxy..."
 echo
-./docker-env service scale --detach ${STACK_NAME}_galera-haproxy=1
+./docker-env service scale ${STACK_NAME}_galera-haproxy=1
 echo -n "Waiting for the galera haproxy to startup..."
 while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-haproxy | grep 1/1 | wc -l | xargs`" != "1" ]
 do
@@ -206,7 +206,7 @@ if [ $? -ne 0 ]; then
   echo
 else
   echo "Closing 3306 on the galera haproxy... use db-open and db-close scripts for data loading"
-  ./docker-env service update --detach --publish-rm 3306 ${STACK_NAME}_galera-haproxy
+  ./docker-env service update --publish-rm 3306 ${STACK_NAME}_galera-haproxy
   sleep 10s
   echo
   echo "MariaDB Galera Cluster: ${STACK_NAME} Successfully deployed!"
