@@ -25,6 +25,11 @@ fi
 echo
 echo "Closing 3306 on the galera haproxy post data load"
 ./docker-env service update --detach --publish-rm 3306 ${STACK_NAME}_galera-haproxy
-echo "Waiting 10s for galera haproxy to reload"
 sleep 10s
+echo -n "Waiting for galera haproxy to restart with 3306 closed..."
+while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-haproxy | grep '1/1' | wc -l | xargs`" != "1" ]
+do
+  echo -n "."
+  sleep 2s
+done
 echo

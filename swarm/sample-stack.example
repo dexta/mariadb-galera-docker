@@ -1,0 +1,22 @@
+#!/bin/bash
+# You can rename this to sample-stack, and git will ignore it
+# then fill in your own deployment configuration files for the two projects
+# and this script templates the recipe for the full drupal7 test stack deployment
+
+MYSQL_PWD=`cat .secrets/mysql_root_password`
+
+bash deploy galera-esxi-swarm-local.yml
+
+bash db-open galera-esxi-swarm-local.yml
+
+cd ../../drupal7-docker/swarm
+
+bash load-testdb drupal-esxi-swarm.yml $MYSQL_PWD
+
+bash deploy drupal-esxi-swarm.yml
+
+cd ../../mariadb-galera-docker/swarm
+
+bash db-close galera-esxi-swarm-local.yml
+
+echo "Full Sample Stack Deployed!"

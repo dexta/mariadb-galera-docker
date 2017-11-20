@@ -9,5 +9,5 @@ docker tag $IMAGE_REPO/mariadb-galera-docker:$MARIADB_VER $IMAGE_REPO/mariadb-ga
 docker push $IMAGE_REPO/mariadb-galera-docker:latest
 
 MARIADB_VER=10.2
-docker build --build-arg imageVer=$MARIADB_VER -t $IMAGE_REPO/mariadb-galera-docker:$MARIADB_VER .
+docker build --build-arg imageVer=$MARIADB_VER.9 -t $IMAGE_REPO/mariadb-galera-docker:$MARIADB_VER .
 docker push $IMAGE_REPO/mariadb-galera-docker:$MARIADB_VER

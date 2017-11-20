@@ -25,8 +25,15 @@ fi
 echo
 echo "Exposing 3306 on the galera haproxy for data load"
 ./docker-env service update --detach --publish-add 3306:3306 ${STACK_NAME}_galera-haproxy
-echo "Waiting 30s for galera haproxy to reload"
-sleep 30s
+sleep 10s
+echo -n "Waiting for galera haproxy to restart with 3306 open..."
+while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-haproxy | grep '1/1' | wc -l | xargs`" != "1" ]
+do
+  echo -n "."
+  sleep 2s
+done
+echo
+sleep 15s
 
 DB_HOST=`echo $DOCKER_HOST | sed 's/:.*//'`
 

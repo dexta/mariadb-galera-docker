@@ -6,5 +6,6 @@ galera.yml
 deploys/**
 !deploys/README.md
 !deploys/galera-example.yml
+sample-stack
 
 

@@ -85,6 +85,7 @@ services:
       - HAPROXY_GALERA_NODE_1=${STACK_NAME}_galera-node1:3306
       - HAPROXY_GALERA_NODE_2=${STACK_NAME}_galera-node2:3306
       - HAPROXY_GALERA_NODE_3=${STACK_NAME}_galera-node3:3306
+      - HAPROXY_GALERA_TIMEOUT=3000
     networks:
       - app_network
       - galera_network

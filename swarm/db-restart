@@ -28,8 +28,11 @@ echo "Shutting down all galera nodes..."
 ./docker-env service scale ${STACK_NAME}_galera-node2=0
 ./docker-env service scale ${STACK_NAME}_galera-node3=0
 
-echo "Waiting 20s for galera nodes to shutdown"
-sleep 20s
+while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node | grep 1/1 | wc -l | xargs`" != "3" ]
+do
+  echo -n "."
+  sleep 3s
+done
 echo
 
 echo
@@ -37,3 +40,12 @@ echo "Restarting all galera nodes..."
 ./docker-env service scale ${STACK_NAME}_galera-node1=1
 ./docker-env service scale ${STACK_NAME}_galera-node2=1
 ./docker-env service scale ${STACK_NAME}_galera-node3=1
+
+while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-node | grep 1/1 | wc -l | xargs`" != "3" ]
+do
+  echo -n "."
+  sleep 3s
+done
+echo
+
+echo "Sucessfully Restarted Galera!"

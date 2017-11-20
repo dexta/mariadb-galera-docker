@@ -192,7 +192,7 @@ do
 done
 echo
 
-sleep 5s
+sleep 15s
 
 DB_HOST=`echo $DOCKER_HOST | sed 's/:.*//'`
 
