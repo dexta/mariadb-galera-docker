@@ -23,6 +23,7 @@ services:
 
   galera-node1:
     image: ${GALERA_IMAGE}:${GALERA_TAG}
+    stop_grace_period: 10s
     deploy:
       mode: replicated
       replicas: 0
@@ -43,6 +44,12 @@ services:
 
   galera-node2:
     image: ${GALERA_IMAGE}:${GALERA_TAG}
+    stop_grace_period: 10s
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [node.labels.front-end != true]
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
@@ -51,16 +58,17 @@ services:
     command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node3
     volumes:
       - galera-node2-volume:/var/lib/mysql    
-    deploy:
-      mode: replicated
-      replicas: 0
-      placement:
-        constraints: [node.labels.front-end != true]
     secrets:
       - xtrabackup_password
 
   galera-node3:
     image: ${GALERA_IMAGE}:${GALERA_TAG}
+    stop_grace_period: 10s
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [node.labels.front-end != true]
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0
@@ -69,11 +77,6 @@ services:
     command: node ${STACK_NAME}_galera-seed,${STACK_NAME}_galera-node1,${STACK_NAME}_galera-node2
     volumes:
       - galera-node3-volume:/var/lib/mysql    
-    deploy:
-      mode: replicated
-      replicas: 0
-      placement:
-        constraints: [node.labels.front-end != true]
     secrets:
       - xtrabackup_password
 
@@ -85,7 +88,6 @@ services:
       - HAPROXY_GALERA_NODE_1=${STACK_NAME}_galera-node1:3306
       - HAPROXY_GALERA_NODE_2=${STACK_NAME}_galera-node2:3306
       - HAPROXY_GALERA_NODE_3=${STACK_NAME}_galera-node3:3306
-      - HAPROXY_GALERA_TIMEOUT=3000
     networks:
       - app_network
       - galera_network
