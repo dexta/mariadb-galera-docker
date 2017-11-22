@@ -10,3 +10,8 @@ Eg.
 docker.example.com/itso/caas/mariadb-galera-docker
 
 Then you can run the __build__ scripts in each image folder to create and push the images to the repository.
+
+MariaDB Galera HAProxy
+----------------------
+The MariaDB Galera HAProxy image has been built using the following recommendations:
+https://severalnines.com/resources/tutorials/mysql-load-balancing-haproxy-tutorial
