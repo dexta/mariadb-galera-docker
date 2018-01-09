@@ -1,22 +1,59 @@
 #!/bin/bash
-# You can rename this to sample-stack, and git will ignore it
-# then fill in your own deployment configuration files for the two projects
-# and this script templates the recipe for the full drupal7 test stack deployment
+
+STACK_VERSION=$1
+GALERA_STACK_HOME=/home/admin/Workspace/mariadb-galera-docker
+DRUPAL_STACK_HOME=/home/admin/Workspace/drupal7-docker
+START_DIR=$PWD
+
+GALERA_DEPLOY_FOLDER=ids/deploys/galera
+DRUPAL_DEPLOY_FOLDER=ids/deploys/drupal
+
+if [ -z $STACK_VERSION ]; then
+  STACK_VERSION=demo
+fi
+
+cd $GALERA_STACK_HOME/swarm
 
 MYSQL_PWD=`cat .secrets/mysql_root_password`
 
-bash deploy galera-esxi-swarm-local.yml
+bash deploy $GALERA_DEPLOY_FOLDER/galera-swarm-$STACK_VERSION.yml
+if [ $? -ne 0 ]; then
+  echo "Failed to deploy galera stack"
+  cd $START_DIR
+  exit 1
+fi
 
-bash db-open galera-esxi-swarm-local.yml
+bash db-open $GALERA_DEPLOY_FOLDER/galera-swarm-$STACK_VERSION.yml
+if [ $? -ne 0 ]; then
+  echo "Failed to open galera mariadb port"
+  cd $START_DIR
+  exit 1
+fi
 
-cd ../../drupal7-docker/swarm
+cd $DRUPAL_STACK_HOME/swarm
 
-bash load-testdb drupal-esxi-swarm.yml $MYSQL_PWD
+bash load-testdb $DRUPAL_DEPLOY_FOLDER/drupal-swarm-$STACK_VERSION.yml $MYSQL_PWD
+if [ $? -ne 0 ]; then
+  echo "Failed to load the drupaldb test data"
+  cd $START_DIR
+  exit 1
+fi
 
-bash deploy drupal-esxi-swarm.yml
+bash deploy $DRUPAL_DEPLOY_FOLDER/drupal-swarm-$STACK_VERSION.yml
+if [ $? -ne 0 ]; then
+  echo "Failed to deploy the drupal7 stack"
+  cd $START_DIR
+  exit 1
+fi
 
-cd ../../mariadb-galera-docker/swarm
+cd $GALERA_STACK_HOME/swarm
 
-bash db-close galera-esxi-swarm-local.yml
+bash db-close $GALERA_DEPLOY_FOLDER/galera-swarm-$STACK_VERSION.yml
+if [ $? -ne 0 ]; then
+  echo "Failed to close the mariadb galera portt"
+  cd $START_DIR
+  exit 1
+fi
 
-echo "Full Sample Stack Deployed!"
+cd $START_DIR
+echo "Full Stack Deployed!"
