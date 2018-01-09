@@ -154,9 +154,9 @@ else
 
   echo "Scaling up permanent galera nodes..."
   echo
-  ./docker-env service scale ${STACK_NAME}_galera-node1=1
-  ./docker-env service scale ${STACK_NAME}_galera-node2=1
-  ./docker-env service scale ${STACK_NAME}_galera-node3=1
+  ./docker-env service scale --detach ${STACK_NAME}_galera-node1=1
+  ./docker-env service scale --detach ${STACK_NAME}_galera-node2=1
+  ./docker-env service scale --detach ${STACK_NAME}_galera-node3=1
   if [ $? -ne 0 ]; then
     echo "Failure scaling up remaining galera-node containers"
     exit 1
@@ -183,7 +183,7 @@ fi
 
 echo "Starting the galera haproxy..."
 echo
-./docker-env service scale ${STACK_NAME}_galera-haproxy=1
+./docker-env service scale --detach ${STACK_NAME}_galera-haproxy=1
 echo -n "Waiting for the galera haproxy to startup..."
 while [ "`./docker-env service ls | grep ${STACK_NAME}_galera-haproxy | grep 1/1 | wc -l | xargs`" != "1" ]
 do
