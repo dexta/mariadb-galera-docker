@@ -2,8 +2,11 @@
 
 export DB_CONFIG=./deploys/$1
 if [ ! -f $DB_CONFIG ]; then 
-  echo "The galera yml config file was unspecified or not found in the 'deploys' folder."
-  return
+  export DB_CONFIG=./clusters/$1
+  if [ ! -f $DB_CONFIG ]; then 
+    echo "The galera yml config file was unspecified or not found at $1."
+    return
+  fi
 fi
 
 export STACK_NAME=`sed -n '/^stack-name:/ {s///p;q;}' $DB_CONFIG | xargs`
