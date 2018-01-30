@@ -1,0 +1,45 @@
+#!/bin/bash
+
+export DB_CONFIG=./deploys/$1
+if [ ! -f $DB_CONFIG ]; then 
+  export DB_CONFIG=./clusters/$1
+  if [ ! -f $DB_CONFIG ]; then 
+    echo "The galera yml config file was unspecified or not found at $1."
+    return
+  fi
+fi
+
+echo "sourcing: ${DB_CONFIG}"
+source $DB_CONFIG
+
+if [ -z $STACK_NAME ]; then 
+  echo "No stack name specified! Stack name is required."
+  return
+fi
+echo $?
+
+if [ -z GALERA_TAG ]; then 
+  GALERA_TAG=10.1 
+fi
+if [ -z HAPROXY_TAG ]; then 
+  HAPROXY_TAG=latest 
+fi
+
+if [ -z GALERA_IMAGE ] || [ -z HAPROXY_IMAGE ]; then 
+  echo "The galera yml config requies that both galera-image and haproxy-image be specified!"
+  return 
+fi
+
+if [ -z $GALERA_NETWORK ]; then 
+  GALERA_NETWORK=10.0.9.0/24 
+fi
+if [ -z $GALERA_NETWORK_NAME ]; then 
+  GALERA_NETWORK_NAME=data_network 
+fi
+
+if [ -z $APP_NETWORK ]; then 
+  GALERA_NETWORK=10.0.13.0/24 
+fi
+if [ -z $APP_NETWORK_NAME ]; then 
+  GALERA_NETWORK_NAME=web_network 
+fi

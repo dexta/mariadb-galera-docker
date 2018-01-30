@@ -1,0 +1,10 @@
+dockerhost
+api-certs/**
+!api-certs/README.md
+clusters
+
+galera.yml
+.secrets
+sample-stack
+
+

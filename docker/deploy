@@ -13,7 +13,7 @@ if [ $? -ne 0 ]; then
   show_usage
   exit 1
 fi
-if [ ! -f $WEB_CONFIG ]; then 
+if [ ! -f $DB_CONFIG ]; then 
   show_usage
   exit 1
 fi
@@ -21,15 +21,6 @@ if [ -z $STACK_NAME ]; then
   show_usage
   exit 1
 fi
-
-SSH_USER=`sed -n '/^ssh-user:/ {s///p;q;}' $DB_CONFIG | xargs`
-SSH_BECOME=`sed -n '/^ssh-become:/ {s///p;q;}' $DB_CONFIG | xargs`
-
-[ -z $GALERA_NETWORK ] && GALERA_NETWORK=10.0.9.0/24
-[ -z $GALERA_NETWORK_NAME ] && GALERA_NETWORK_NAME=data_network
-
-[ -z $APP_NETWORK ] && GALERA_NETWORK=10.0.13.0/24
-[ -z $APP_NETWORK_NAME ] && GALERA_NETWORK_NAME=web_network
 
 XTRABACKUP_PWD=` cat .secrets/xtrabackup_password`
 MYSQL_PWD=` cat .secrets/mysql_password`
@@ -49,9 +40,7 @@ if [ "$USE_VDVS" == "true" ]; then
   echo "vDVS Data Volume Configuration:"
   echo "-------------------------------"
 
-  HOST_NODE_VOL_SIZE=`sed -n '/^host-node-volume-size:/ {s///p;q;}' $DB_CONFIG | xargs`
   [ -z $HOST_NODE_VOL_SIZE ] && HOST_NODE_VOL_SIZE=128gb
-  export HOST_NODE_DATASTORE=`sed -n '/^host-node-datastore:/ {s///p;q;}' $DB_CONFIG | xargs`
 
   echo -n "Creating the ${HOST_NODE_VOL_SIZE} vDVS seed volume for the galera cluster: "
   ./docker-env volume create --driver=vsphere --name=${STACK_NAME}_galera-seed-volume@${HOST_NODE_DATASTORE} -o size=${HOST_NODE_VOL_SIZE}

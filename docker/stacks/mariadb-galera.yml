@@ -105,8 +105,8 @@ networks:
 
 secrets:
   xtrabackup_password:
-    file: .secrets/xtrabackup_password
+    file: ../.secrets/xtrabackup_password
   mysql_password:
-    file: .secrets/mysql_password
+    file: ../.secrets/mysql_password
   mysql_root_password:
-    file: .secrets/mysql_root_password
+    file: ../.secrets/mysql_root_password
