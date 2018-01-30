@@ -59,7 +59,7 @@ See https://github.com/docker/docker.github.io/blob/master/swarm/swarm-api.md fo
 
 > You should then be able to deploy images from the private registry.  The authentication information will be passed via the HTTP HEADER, and then passed on to the worker nodes.
 
-## Configuration File Example
+## Configuration File Details
     
     DOCKER_HOST=The manager node with remote api enabled
     DOCKER_CERT_PATH=The location of the docker remote api certificates
@@ -87,53 +87,52 @@ See https://github.com/docker/docker.github.io/blob/master/swarm/swarm-api.md fo
 
 __Eg.__
 
-    DOCKER_HOST=demo-swarm-m1:2376
-    DOCKER_CERT_PATH="./api-certs/demo-swarm-m1"
+    export DOCKER_HOST=demo-swarm-m1:2376
+    export DOCKER_CERT_PATH="./api-certs/demo-swarm-m1"
 
-    STACK_NAME=tier1
+    export STACK_NAME=tier1
 
-    GALERA_NODE1=demo-swarm-w1
-    GALERA_NODE2=demo-swarm-w2
-    GALERA_NODE3=demo-swarm-w3
+    export GALERA_NODE1=demo-swarm-w1
+    export GALERA_NODE2=demo-swarm-w2
+    export GALERA_NODE3=demo-swarm-w3
 
-    GALERA_IMAGE=idstudios/mariadb-galera-docker
-    GALERA_TAG=10.1
+    export GALERA_IMAGE=idstudios/mariadb-galera-docker
+    export GALERA_TAG=10.1
 
-    HAPROXY_TAG=latest
-    HAPROXY_IMAGE=idstudios/mariadb-galera-haproxy
+    export HAPROXY_TAG=latest
+    export HAPROXY_IMAGE=idstudios/mariadb-galera-haproxy
 
-    GALERA_NETWORK_NAME=data_network
-    GALERA_NETWORK=10.0.9.0/24
+    export GALERA_NETWORK_NAME=data_network
+    export GALERA_NETWORK=10.0.9.0/24
 
-    APP_NETWORK=192.168.42.0/24
-    APP_NETWORK_NAME=web_network
+    export APP_NETWORK=192.168.42.0/24
+    export APP_NETWORK_NAME=web_network
 
-    SSH_USER=admin
-    SSH_BECOME=sudo 
+    export SSH_USER=admin
+    export SSH_BECOME=sudo 
 
 Or to use the __VMware Docker Volume Service__ version:
 
-    DOCKER_HOST=swarm-api.idstudios.local:2376
-    DOCKER_CERT_PATH="./api-certs/ids/swarm-c1/api-certs"
+    export DOCKER_HOST=swarm-api.idstudios.local:2376
+    export DOCKER_CERT_PATH="./api-certs/ids/swarm-c1/api-certs"
 
-    STACK_NAME=tier1
+    export STACK_NAME=tier1
 
-    USE_VDVS=true
-    HOST_NODE_VOLUME_SIZE=5gb
-    HOST_NODE_DATASTORE=san
+    export USE_VDVS=true
+    export HOST_NODE_VOLUME_SIZE=5gb
+    export HOST_NODE_DATASTORE=san
 
-    GALERA_IMAGE=idstudios/mariadb-galera-docker
-    GALERA_TAG=10.1
+    export GALERA_IMAGE=idstudios/mariadb-galera-docker
+    export GALERA_TAG=10.1
 
-    HAPROXY_TAG=latest
-    HAPROXY_IMAGE=idstudios/mariadb-galera-haproxy
+    export HAPROXY_TAG=latest
+    export HAPROXY_IMAGE=idstudios/mariadb-galera-haproxy
 
-    GALERA_NETWORK_NAME=data_network
-    GALERA_NETWORK=10.0.9.0/24
+    export GALERA_NETWORK_NAME=data_network
+    export GALERA_NETWORK=10.0.9.0/24
 
-    APP_NETWORK=192.168.42.0/24
-    APP_NETWORK_NAME=web_network
-
+    export APP_NETWORK=192.168.42.0/24
+    export APP_NETWORK_NAME=web_network
 
 > Example configuration files can be found in the __examples__ folder.
 
@@ -151,7 +150,6 @@ When data loading is complete, external access can be closed again:
 
     bash db-close <galera configuration file>
 
-
 ## Simulate Hard Crash Recovery
 
 To immediately scale all nodes to zero, killing the server processes, and then restart them.  Metaphorically pulling the plug on the servers.
@@ -159,7 +157,6 @@ To immediately scale all nodes to zero, killing the server processes, and then r
 > Demonstrates the socat based node information exchange mechanism for auto-assessing the node state and determining the most recent GTID.  Implemented as part of the mysqld.sh custom shim script in the container for galera node coordination.
 
     bash db-restart <galera configuration file>
-
 
 ## Rolling Upgrade from MariaDB 10.1 to 10.2
 
