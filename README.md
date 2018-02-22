@@ -9,4 +9,6 @@ It currently works in both Docker Swarm and DC/OS using the same Docker images.
 
 See the [dcos](./dcos) README for instructions on deploying to DC/OS.
 
-See the [swarm](./swarm) README for instructions on deploying to Docker Swarm.
+See the [docker](./swarm) README for instructions on deploying to Docker Swarm.
+
+See the [kubernetes](./k8s) README for instructions on deploying to Kubernetes.

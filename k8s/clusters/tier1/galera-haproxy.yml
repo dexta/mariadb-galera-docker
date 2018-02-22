@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: ReplicaSet
+metadata:
+  name: tier1-galera-haproxy
+  labels:
+    app: tier1-galera-haproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tier1-galera-haproxy
+  template:
+    metadata:
+      labels:
+        app: tier1-galera-haproxy
+    spec:
+      containers:
+      - name: tier1-galera-haproxy
+        image: idstudios/mariadb-galera-haproxy:latest
+        env:
+        - name: HAPROXY_GALERA_NODE_1
+          value: tier1-galera-node1
+        - name: HAPROXY_GALERA_NODE_2
+          value: tier1-galera-node2
+        - name: HAPROXY_GALERA_NODE_3
+          value: tier1-galera-node3
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+        ports:
+        - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tier1-galera-haproxy
+spec:
+  ports:
+  - port: 3306
+    protocol: TCP
+  selector:
+    app: tier1-galera-haproxy

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+IMAGE_REPO=`cat ../registry`
+docker build -t $IMAGE_REPO/mariadb-galera-docker-alpine:10.2.5 -f Dockerfile.alpine .
+docker push $IMAGE_REPO/mariadb-galera-docker-alpine:10.2.5

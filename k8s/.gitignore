@@ -1,0 +1,4 @@
+clusters/*
+!clusters/README.md
+!clusters/tier1
+
