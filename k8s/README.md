@@ -13,13 +13,13 @@ This configuration uses iSCSI direct access for the persistent data volumes.  It
 
 It uses ansible templates to generate a __MariaDB Galera__ yaml manifests based on configuration information supplied via an ansible inventory file.
 
-In the __clusters__ folder create a sub-folder that matches the name of the prefix for the galera cluster name (see the example in the __tier1__ folder).
+In the __clusters__ folder create a sub-folder that matches the name of the prefix for the galera cluster name (see the example in the __tier1-example__ folder).
 
-Add an ansible configuration file with the specifics to your environment, see the __galera.conf__ file in the __tier1__ example.
+Add an ansible configuration file with the specifics to your environment, see the __galera.conf__ file in the __tier1-example__ example.
 
 Run the ansible playbook to generate the Kubernetes YAML deployment manifests:
 
-    $ ansible-playbook -i clusters/tier1/galera.conf mariadb-galera-template.yml
+    $ ansible-playbook -i clusters/tier1-example/galera.conf mariadb-galera-template.yml
 
 This will create a set of output manifest files that can then be deployed to Kubernetes:
 
