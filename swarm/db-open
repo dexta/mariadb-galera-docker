@@ -2,9 +2,9 @@
 
 function show_usage () {
   echo 
-  echo "Usage: db-open <galera yml config file>"
+  echo "Usage: db-restart <galera config file>"
   echo 
-  echo "Eg: db-open tier1-galera.yml"
+  echo "Eg: db-restart tier1-galera.conf"
   echo 
 }
 

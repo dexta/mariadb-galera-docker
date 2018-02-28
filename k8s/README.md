@@ -5,7 +5,7 @@ Still early in the development of the k8s version.
 
 > Make sure to clear out the iSCSI volumes between cluster creations.  If there is existing galera data on the volumes the clusters will try to recover instead of forming new nodes.
 
-> This has been tested and developed on the Tectonic CoreOS cluster from [cluster-builder](https://github.com/ids/cluster-builder).
+> This has been tested and developed on the __Tectonic CoreOS__ cluster from [cluster-builder](https://github.com/ids/cluster-builder).
 
 This configuration uses iSCSI direct access for the persistent data volumes.  It requires access to an iSCSI target that contains at least 4 luns: 1 for the initial seed volume which will be discarded, and 3 for the permanent node volumes.
 
