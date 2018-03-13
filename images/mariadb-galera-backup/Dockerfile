@@ -27,16 +27,16 @@ COPY bin/galera-healthcheck  /usr/local/bin/galera-healthcheck
 HEALTHCHECK CMD /usr/local/bin/healthcheck.sh
 
 # Add crontab file in the cron directory
-ADD crontab /etc/cron.d/mariadb-backup
+#ADD crontab /etc/crontab
+#RUN chmod 0644 /etc/crontab
 
 # Give execution rights on the cron job
-RUN chmod 0644 /etc/cron.d/mariadb-backup
+#RUN chmod 0644 /etc/cron.d/mariadb-backup
 
 # Create the log file to be able to run tail
-RUN mkdir /var/log/cron
-RUN echo '** galera backup service has started...' > /var/log/cron/cron.log
-
-VOLUME /var/backup/mysql
+#RUN mkdir /var/log/cron
+#ADD cron.log /var/log/cron/cron.log
+RUN mkdir /var/log/galera_backups
 
 ENTRYPOINT ["/usr/local/bin/start.sh"]
 

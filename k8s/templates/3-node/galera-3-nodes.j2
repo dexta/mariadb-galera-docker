@@ -20,7 +20,7 @@ spec:
         args: ["node", "{{ galera_cluster_name }}-galera-seed,{{ galera_cluster_name }}-galera-node2,{{ galera_cluster_name }}-galera-node3"]
         env:
         - name: XTRABACKUP_PASSWORD
-          val_password }}
+          value: "{{ galera_xtrabackup_password }}"
         - name: NODE_ADDRESS
           value: "eth0"
         - name: HEALTHY_WHILE_BOOTING
@@ -69,7 +69,7 @@ spec:
         args: ["node", "{{ galera_cluster_name }}-galera-seed,{{ galera_cluster_name }}-galera-node1,{{ galera_cluster_name }}-galera-node3"]
         env:
         - name: XTRABACKUP_PASSWORD
-          val_password }}
+          value: "{{ galera_xtrabackup_password }}"
         - name: NODE_ADDRESS
           value: "eth0"
         - name: HEALTHY_WHILE_BOOTING
@@ -112,13 +112,18 @@ spec:
       labels:
         app: {{ galera_cluster_name }}-galera-node3
     spec:
+      volumes:
+      - name: {{ galera_cluster_name }}-galera-node3-volume
+        persistentVolumeClaim:
+          claimName: {{ galera_cluster_name }}-galera-node3-volume-claim
+    
       containers:
       - name: {{ galera_cluster_name }}-galera-node3
         image: {{ galera_cluster_docker_image }}
         args: ["node", "{{ galera_cluster_name }}-galera-seed,{{ galera_cluster_name }}-galera-node1,{{ galera_cluster_name }}-galera-node2"]
         env:
         - name: XTRABACKUP_PASSWORD
-          value: {{ galera_xtrabackup_password }}
+          value: "{{ galera_xtrabackup_password }}"
         - name: NODE_ADDRESS
           value: "eth0"
         - name: HEALTHY_WHILE_BOOTING
@@ -126,7 +131,7 @@ spec:
         livenessProbe:
           tcpSocket:
             port: 3306
-          initialDelaySeconds: 60
+          initialDelaySeconds: 120
           periodSeconds: 10        
         ports:
         - containerPort: 3306
@@ -140,10 +145,6 @@ spec:
         volumeMounts:
           - name: {{ galera_cluster_name }}-galera-node3-volume
             mountPath: "/var/lib/mysql"
-      volumes:
-      - name: {{ galera_cluster_name }}-galera-node3-volume
-        persistentVolumeClaim:
-          claimName: {{ galera_cluster_name }}-galera-node3-volume-claim
 ---
 apiVersion: v1
 kind: Service

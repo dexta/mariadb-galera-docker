@@ -1,0 +1,16 @@
+kubectl apply -f galera-volumes.yml
+kubectl apply -f galera-seed.yml
+
+echo "Waiting 30s for the seed to come up..."
+sleep 30s
+
+kubectl apply -f galera-nodes.yml
+
+echo "Waiting 120s for the nodes to come up..."
+sleep 120s
+
+kubectl apply -f galera-external-access.yml
+
+echo "MariaDB should now be listening on the specified NodePort."
+echo
+

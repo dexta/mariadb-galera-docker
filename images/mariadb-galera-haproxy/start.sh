@@ -8,10 +8,27 @@ printf "HAPROXY_GALERA_NODE_2=${HAPROXY_GALERA_NODE_2}\n" >> /etc/default/haprox
 printf "HAPROXY_GALERA_NODE_3=${HAPROXY_GALERA_NODE_3}\n" >> /etc/default/haproxy
 printf "HAPROXY_GALERA_TIMEOUT=${HAPROXY_GALERA_TIMEOUT}\n" >> /etc/default/haproxy
 
-echo "NODE_1: ${HAPROXY_GALERA_NODE_1}"
-echo "NODE_2: ${HAPROXY_GALERA_NODE_2}"
-echo "NODE_3: ${HAPROXY_GALERA_NODE_3}"
+echo "NODE_COUNT: ${HAPROXY_GALERA_NODE_COUNT}"
+[ -z $NODE_COUNT ] && NODE_COUNT=3
+
 echo "TIMEOUT: ${HAPROXY_GALERA_TIMEOUT}"
 
-echo "Starting HA PROXY..."
-haproxy -f /usr/local/etc/haproxy/haproxy.cfg -V
+if [ "$NODE_COUNT" == "3"]; then
+  echo "NODE_1: ${HAPROXY_GALERA_NODE_1}"
+  echo "NODE_2: ${HAPROXY_GALERA_NODE_2}"
+  echo "NODE_3: ${HAPROXY_GALERA_NODE_3}"
+
+  echo "Starting 3-Node HA PROXY..."
+  haproxy -f /usr/local/etc/haproxy/haproxy3.cfg -V
+else
+  echo "NODE_1: ${HAPROXY_GALERA_NODE_1}"
+  echo "NODE_2: ${HAPROXY_GALERA_NODE_2}"
+  echo "NODE_3: ${HAPROXY_GALERA_NODE_3}"
+  echo "NODE_4: ${HAPROXY_GALERA_NODE_4}"
+  echo "NODE_5: ${HAPROXY_GALERA_NODE_5}"
+
+  echo "Starting 5-Node HA PROXY..."
+  haproxy -f /usr/local/etc/haproxy/haproxy5.cfg -V
+fi
+
+

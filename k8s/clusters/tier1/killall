@@ -1,0 +1,4 @@
+kubectl delete -f galera-nodes.yml
+kubectl delete -f galera-seed.yml
+kubectl delete -f galera-volumes.yml
+

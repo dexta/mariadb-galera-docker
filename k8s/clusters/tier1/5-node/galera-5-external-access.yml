@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: tier1-galera-external-access
+  namespace: default
+spec:
+  ports:
+    - name: mysql
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+      nodePort: 30306
+  selector:
+    app: tier1-galera-haproxy
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+status:
+  loadBalancer: {}

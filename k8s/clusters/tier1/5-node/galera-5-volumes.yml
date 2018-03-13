@@ -1,0 +1,221 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-seed-volume
+  labels:
+    volume: tier1-galera-seed-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 192.168.100.40:3260
+    iqn: iqn.2018-04.io.idstudios:server.target0
+    lun: 1
+    fsType: ext4
+    readOnly: false    
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-seed-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-seed-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-node1-volume
+  labels:
+    volume: tier1-galera-node1-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 192.168.100.40:3260
+    iqn: iqn.2018-04.io.idstudios:server.galera
+    lun: 1
+    fsType: ext4
+    readOnly: false    
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-node1-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-node1-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-node2-volume
+  labels:
+    volume: tier1-galera-node2-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 192.168.100.40:3260
+    iqn: iqn.2018-04.io.idstudios:server.galera
+    lun: 2
+    fsType: ext4
+    readOnly: false    
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-node2-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-node2-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-node3-volume
+  labels:
+    volume: tier1-galera-node3-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 192.168.100.40:3260
+    iqn: iqn.2018-04.io.idstudios:server.galera
+    lun: 3
+    fsType: ext4
+    readOnly: false    
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-node3-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-node3-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-node4-volume
+  labels:
+    volume: tier1-galera-node4-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 192.168.100.40:3260
+    iqn: iqn.2018-04.io.idstudios:server.galera
+    lun: 4
+    fsType: ext4
+    readOnly: false    
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-node4-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-node4-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-node5-volume
+  labels:
+    volume: tier1-galera-node5-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 192.168.100.40:3260
+    iqn: iqn.2018-04.io.idstudios:server.galera
+    lun: 5
+    fsType: ext4
+    readOnly: false    
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-node5-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-node5-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-backup-volume
+  labels:
+    volume: tier1-galera-backup-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: "192.168.100.40"
+    path: "/data/shared/backups"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-backup-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-backup-volume
+---
