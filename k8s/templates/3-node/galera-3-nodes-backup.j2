@@ -119,9 +119,6 @@ spec:
       - name: {{ galera_cluster_name }}-galera-backup-volume
         persistentVolumeClaim:
           claimName: {{ galera_cluster_name }}-galera-backup-volume-claim
-      - name: {{ galera_cluster_name }}-galera-backup-log-volume
-        persistentVolumeClaim:
-          claimName: {{ galera_cluster_name }}-galera-backup-log-volume-claim
       - name: mysqld-pid
         emptyDir: {}
 
@@ -168,6 +165,9 @@ spec:
           value: "{{ galera_xtrabackup_password }}"
         - name: RETENTION_PERIOD_DAYS
           value: "{{ galera_cluster_backup_retention_days }}"
+        - name: INC_BACKUP_INTERVAL
+          value: "{{ galera_cluster_backup_incremental_interval }}"
+        
         volumeMounts:
           - name: {{ galera_cluster_name }}-galera-node3-volume
             mountPath: "/var/lib/mysql"

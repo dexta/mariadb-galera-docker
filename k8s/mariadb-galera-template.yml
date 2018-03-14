@@ -6,8 +6,11 @@
   vars:
 
     galera_cluster_home: "clusters/{{ galera_cluster_name }}"
-    
+
   tasks:
+
+  - set_fact: namesgalera_cluster_backup_incremental_intervalpace="15m"
+    when: galera_cluster_backup_incremental_interval is undefined
 
   - name: Ensure the cluster folder exists
     local_action:

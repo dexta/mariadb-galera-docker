@@ -263,6 +263,9 @@ spec:
           value: "Fender2000"
         - name: RETENTION_PERIOD_DAYS
           value: "7"
+        - name: INC_BACKUP_INTERVAL
+          value: "5m"
+
         volumeMounts:
           - name: tier1-galera-node3-volume
             mountPath: "/var/lib/mysql"

@@ -28,18 +28,25 @@ if [ -z $RETENTION_PERIOD_DAYS ]; then
   RETENTION_PERIOD_DAYS=7
 fi
 
-HOUR=`date +%H`
+
+# the CURRENT_INC determines the period of the incremental backup
+# if the folder exists, the backup is considered complete.
+
+BACKUP_HOUR=`date +%H`
+BACKUP_MINUTE=`date +%M`
 DAY_OF_YEAR=`date +%j`
 
 CURRENT_DATE_STAMP=`date +%Y_%m_%d`
 CURRENT_BASE=day_${DAY_OF_YEAR}_${CURRENT_DATE_STAMP}
-CURRENT_INC=$HOUR
+CURRENT_INC=${BACKUP_HOUR}_${BACKUP_MINUTE}
 
 TARGET_FOLDER=/target/$CURRENT_BASE
 FULL_BACKUP_FOLDER=$TARGET_FOLDER/base
-INC_BACKUP_FOLDER=$TARGET_FOLDER/inc$CURRENT_INC
+INC_BACKUP_FOLDER=$TARGET_FOLDER/inc_$CURRENT_INC
+NOW=`date`
 
-echo
+echo "---"
+echo "MariaDB Backup Agent"
 echo "---"
 echo "Host: ${PERCONA_BACKUP_HOST}"
 echo "User: ${PERCONA_BACKUP_USER}"
@@ -48,9 +55,7 @@ echo "Full Backup Folder: ${FULL_BACKUP_FOLDER}"
 echo "Incremental Backup Folder: ${INC_BACKUP_FOLDER}"
 echo "Incremental Backup Interval: ${INC_BACKUP_INTERVAL}"
 echo "---"
-echo
-
-
+echo "Current Timestamp: ${NOW}"
 
 DEAD_BASE_DATE=`date --date="${RETENTION_PERIOD_DAYS} days ago" +"%Y_%m_%d"`
 DEAD_BASE_DAY=`expr $DAY_OF_YEAR - ${RETENTION_PERIOD_DAYS}`

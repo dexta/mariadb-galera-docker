@@ -4,12 +4,8 @@ echo
 echo "MariaDB Galera Backup Agent"
 echo "---------------------------"
 echo "mode: $1"
+echo "started: `date`"
 echo
-
-if [ -z $INC_BACKUP_INTERVAL ]; then
-  INC_BACKUP_INTERVAL=15
-fi
-
 
 case "$1" in
 	sleep)
@@ -24,7 +20,12 @@ case "$1" in
 		exit
 		;;
 	agent)
-		echo "Starting automated backup agent..."
+		if [ -z $INC_BACKUP_INTERVAL ]; then
+			export INC_BACKUP_INTERVAL=15m
+		else 
+			export INC_BACKUP_INTERVAL=$INC_BACKUP_INTERVAL
+		fi
+		echo "Starting automated backup agent with incrementals @ ${INC_BACKUP_INTERVAL}..."
     while [ 1 ]
     do
 	    /usr/local/bin/percona-backup.sh
