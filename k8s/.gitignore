@@ -1,4 +1,5 @@
 clusters/*
 !clusters/README.md
 !clusters/tier1
+*.retry
 
