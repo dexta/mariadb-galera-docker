@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tier1-galera-restore-job
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tier1-galera-backup-volume
+        persistentVolumeClaim:
+          claimName: tier1-galera-backup-volume-claim
+      - name: tier1-galera-backup-temp-volume
+        persistentVolumeClaim:
+          claimName: tier1-galera-backup-temp-volume-claim
+      - name: tier1-galera-seed-volume
+        persistentVolumeClaim:
+          claimName: tier1-galera-seed-volume-claim
+    
+      containers:
+      - name: tier1-galera-backup-agent
+        image: idstudios/mariadb-galera-backup:latest
+        args: ["restore"]
+        env:
+        - name: SOURCE_BACKUP
+          value: "latest"
+        - name: SOURCE_INCREMENT
+          value: "latest"
+        
+        volumeMounts:
+          - name: tier1-galera-backup-volume
+            mountPath: "/backups"
+          - name: tier1-galera-backup-temp-volume
+            mountPath: "/temp"
+          - name: tier1-galera-seed-volume
+            mountPath: "/target"
+      restartPolicy: Never
+  backoffLimit: 4

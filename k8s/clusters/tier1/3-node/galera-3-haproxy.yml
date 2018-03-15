@@ -19,7 +19,7 @@ spec:
         image: idstudios/mariadb-galera-haproxy:latest
         env:
         - name: HAPROXY_GALERA_NODE_COUNT
-          value: 3
+          value: "3"
         - name: HAPROXY_GALERA_NODE_1
           value: tier1-galera-node1
         - name: HAPROXY_GALERA_NODE_2

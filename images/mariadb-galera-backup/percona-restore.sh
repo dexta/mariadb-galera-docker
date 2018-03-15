@@ -2,35 +2,17 @@
 
 echo "Running the MariaDB Galera primary restore service..."
 
-PERCONA_BACKUP_HOST_FILE=${PERCONA_BACKUP_HOST_FILE:-/run/secrets/db-backup-xtrabackup_host}
-if [ -z $PERCONA_BACKUP_HOST ] && [ -f $PERCONA_BACKUP_HOST_FILE ]; then
-	PERCONA_BACKUP_HOST=$(cat $PERCONA_BACKUP_HOST_FILE)
-fi
-[ -z "$PERCONA_BACKUP_HOST" ] && { echo "PERCONA_BACKUP_HOST not set"; exit 1; }
-
-PERCONA_BACKUP_USER_FILE=${PERCONA_BACKUP_USER_FILE:-/run/secrets/db-backup-xtrabackup_user}
-if [ -z $PERCONA_BACKUP_USER ] && [ -f $PERCONA_BACKUP_USER_FILE ]; then
-	PERCONA_BACKUP_USER=$(cat $PERCONA_BACKUP_USER_FILE)
-fi
-[ -z "$PERCONA_BACKUP_USER" ] && { echo "PERCONA_BACKUP_USER not set"; exit 1; }
-
-PERCONA_BACKUP_PASSWORD_FILE=${PERCONA_BACKUP_PASSWORD_FILE:-/run/secrets/db-backup-xtrabackup_password}
-if [ -z $PERCONA_BACKUP_PASSWORD ] && [ -f $PERCONA_BACKUP_PASSWORD_FILE ]; then
-	PERCONA_BACKUP_PASSWORD=$(cat $PERCONA_BACKUP_PASSWORD_FILE)
-fi
-[ -z "$PERCONA_BACKUP_PASSWORD" ] && { echo "PERCONA_BACKUP_PASSWORD not set"; exit 1; }
-
-RETENTION_PERIOD_FILE=${RETENTION_PERIOD_FILE:-/run/secrets/db-backup-xtrabackup_retention}
-if [ -z $RETENTION_PERIOD_DAYS ] && [ -f $RETENTION_PERIOD_FILE ]; then
-	RETENTION_PERIOD_DAYS=$(cat $RETENTION_PERIOD_FILE)
-fi
-[ -z "$RETENTION_PERIOD_DAYS" ] && { $RETENTION_PERIOD_DAYS=7 }
-
-if [ -z $SOURCE_BACKUP_FOLDER ]; then
-	echo "** SOURCE_BACKUP_FOLDER is not set!"
-	echo "Please set SOURCE_BACKUP_FOLDER to the root target backup folder to restore!"
+export BACKUPS_FOLDER=/backups
+if [ -z $SOURCE_BACKUP ]; then
+	echo "** SOURCE_BACKUP must be specified!"
 	exit 1
+fi
+
+if [ "$SOURCE_BACKUP" == "latest" ]; then
+	SOURCE_BACKUP=$(ls -t $BACKUPS_FOLDER | head -1) 
 fi 
+
+export SOURCE_BACKUP_FOLDER=$BACKUPS_FOLDER/$SOURCE_BACKUP
 if [ ! -d $SOURCE_BACKUP_FOLDER ]; then
 	echo "** SOURCE_BACKUP_FOLDER does not exist!"
 	echo "SOURCE_BACKUP_FOLDER: ${SOURCE_BACKUP_FOLDER}"
@@ -43,22 +25,14 @@ if [ ! -d $SOURCE_BACKUP_FOLDER/base ]; then
 	exit 1
 fi 
 
-if [ -z $TEMP_WORKING_FOLDER ]; then
-	echo "** TEMP_WORKING_FOLDER is not set!"
-	echo "Please set TEMP_WORKING_FOLDER to a volume with enough space to hold the copied backup files!"
-	exit 1
-fi 
+export TEMP_WORKING_FOLDER=/temp 
 if [ ! -d $TEMP_WORKING_FOLDER ]; then
 	echo "** TEMP_WORKING_FOLDER does not exist!"
 	echo "TEMP_WORKING_FOLDER: ${TEMP_WORKING_FOLDER}"
 	exit 1
 fi 
 
-if [ -z $TARGET_DATA_FOLDER ]; then
-	echo "** TARGET_DATA_FOLDER is not set!"
-	echo "Please set TARGET_DATA_FOLDER to the volume intended to hold the restored database files!"
-	exit 1
-fi 
+export TARGET_DATA_FOLDER=/target 
 if [ ! -d $TARGET_DATA_FOLDER ]; then
 	echo "** TARGET_DATA_FOLDER does not exist!"
 	echo "TARGET_DATA_FOLDER: ${TARGET_DATA_FOLDER}"
@@ -90,8 +64,10 @@ rsync -avrP $SOURCE_BACKUP_FOLDER $TEMP_WORKING_FOLDER
 # $ xtrabackup --prepare --apply-log-only --target-dir=/data/backups/base  --incremental-dir=/data/backups/inc1
 
 INC_COUNT=`ls -t ${TEMP_WORKING_FOLDER} | grep inc_ | sort | wc -l`
+echo "INC_COUNT: ${INC_COUNT}"
+
 INC_INDEX=0
-if [ "$INC_COUNT" == "0"]; then
+if [ "$INC_COUNT" == "0" ]; then
 
 	echo "** There are NO INCREMENTAL BACKUPS for this restore! **"
 	echo "Preparing the full backup at $TEMP_WORKING_FOLDER/base..."
@@ -104,9 +80,10 @@ else
 	echo "Preparing the base backup at $TEMP_WORKING_FOLDER/base..."
 	xtrabackup --prepare --apply-log-only --target-dir=$TEMP_WORKING_FOLDER/base
 
+	LAST_INC_BACKUP=$(ls -t ${TEMP_WORKING_FOLDER} | head -1) 
+
 	for inc_folder in `ls -t ${TEMP_WORKING_FOLDER} | grep inc_ | sort`; do
-			let INC_INDEX++
-			if [ "$INC_INDEX" == "$INC_COUNT" ]; then
+			if [ "$inc_folder" != "$LAST_INC_BACKUP" ]; then
 				# this must be the last incremental backup, so we don't do --apply-log-only
 				echo "Preparing the FINAL increment: ${inc_folder}"
 				xtrabackup --prepare --target-dir=$TEMP_WORKING_FOLDER/base --incremental-dir=$TEMP_WORKING_FOLDER/$inc_folder
@@ -117,6 +94,10 @@ else
 	done
 
 fi
+
+echo "Purging target data folder..."
+cd $TARGET_DATA_FOLDER
+rm -rf *
 
 # Now that the backups are prepared, we can restore the backup from the FULL
 echo "Copying the restored data files to the target data folder"

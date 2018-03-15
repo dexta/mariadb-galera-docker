@@ -77,6 +77,7 @@ fi
 if [ ! -d $FULL_BACKUP_FOLDER ]; then
   echo date
   echo "Running the FULL Backup..."
+  START_TIME=$SECONDS
   xtrabackup --backup --compress --compress-threads=4 \
     --host=$PERCONA_BACKUP_HOST --user=$PERCONA_BACKUP_USER --password=$PERCONA_BACKUP_PASSWORD \
     --datadir /var/lib/mysql --target-dir=$FULL_BACKUP_FOLDER
@@ -85,9 +86,13 @@ if [ ! -d $FULL_BACKUP_FOLDER ]; then
   fi
   echo "FULL Backup complete ${FULL_BACKUP_FOLDER}"
   echo
+  ELAPSED_TIME=$(($SECONDS - $START_TIME))
+  echo "FULL Backup Completed in: $(($ELAPSED_TIME/60)) min $(($ELAPSED_TIME%60)) sec" 
+  echo
 else 
   if [ -n $INC_BACKUP_FOLDER ] && [ ! -d $INC_BACKUP_FOLDER ]; then
     echo date
+    START_TIME=$SECONDS
     echo "Running the INCREMENTAL Backup..."
     xtrabackup --backup --compress --compress-threads=4 \
       --host=$PERCONA_BACKUP_HOST --user=$PERCONA_BACKUP_USER --password=$PERCONA_BACKUP_PASSWORD \
@@ -98,6 +103,10 @@ else
     fi
     echo "INCREMENTAL Backup complete ${INC_BACKUP_FOLDER}"
     echo
+		ELAPSED_TIME=$(($SECONDS - $START_TIME))
+		echo "INCREMENTAL Backup Completed in: $(($ELAPSED_TIME/60)) min $(($ELAPSED_TIME%60)) sec" 
+		echo
+    
   else
     echo "Backups are up to date - nothing to do."
     echo

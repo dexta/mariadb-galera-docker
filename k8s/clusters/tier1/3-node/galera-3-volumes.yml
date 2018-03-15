@@ -155,3 +155,32 @@ spec:
     matchLabels:
       volume: tier1-galera-backup-volume
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tier1-galera-backup-temp-volume
+  labels:
+    volume: tier1-galera-backup-temp-volume
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: "192.168.100.40"
+    path: "/data/shared/temp"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tier1-galera-backup-temp-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      volume: tier1-galera-backup-temp-volume
+---
