@@ -82,7 +82,7 @@ else
 	# To prepare the base backup, you need to run xtrabackup --prepare as usual, but prevent the rollback phase:
 	# $ xtrabackup --prepare --apply-log-only --target-dir=/data/backups/base
 	#echo "Preparing the base backup at $TEMP_WORKING_BACKUP/base..."
-	xtrabackup --decompress --parallel=4  --remove-original --target-dir=$TEMP_WORKING_BACKUP/base
+	xtrabackup --decompress --parallel=4  --remove-original --target-dir=$TEMP_WORKING_BACKUP/base > /dev/null 2>&1
 	echo "---"
 	cat $TEMP_WORKING_BACKUP/base/xtrabackup_checkpoints
 	echo "---"
@@ -97,7 +97,7 @@ for inc_folder in `ls -t ${TEMP_WORKING_BACKUP} | grep inc_ | sort`; do
 				echo ">>>>>"
 				echo "Preparing the FINAL increment: ${LAST_INC_BACKUP}"
 				echo ">>>>>"
-				xtrabackup --decompress --parallel=4  --remove-original --target-dir=$TEMP_WORKING_BACKUP/$LAST_INC_BACKUP
+				xtrabackup --decompress --parallel=4  --remove-original --target-dir=$TEMP_WORKING_BACKUP/$LAST_INC_BACKUP > /dev/null 2>&1
 				echo "---"
 				cat $TEMP_WORKING_BACKUP/$LAST_INC_BACKUP/xtrabackup_checkpoints
 				echo "---"
