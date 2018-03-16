@@ -242,7 +242,7 @@ mariadb-galera-backup [percona-backup.sh](../images/mariadb-galera-backup/start.
 
 mariadb-galera-backup [percona-restore.sh](../images/mariadb-galera-backup/start.sh)
 
-## MariaDB Helm Chart
+## MariaDB Galera Helm Chart
 
 https://docs.helm.sh/
 
