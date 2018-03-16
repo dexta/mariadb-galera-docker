@@ -25,7 +25,10 @@ case "$1" in
 		else 
 			export INC_BACKUP_INTERVAL=$INC_BACKUP_INTERVAL
 		fi
-		echo "Starting automated backup agent with incrementals @ ${INC_BACKUP_INTERVAL}..."
+		echo "Starting automated backup agent with incrementals every ${INC_BACKUP_INTERVAL}..."
+		echo "(sleeping 3m to allow for MariaDB node initialization)"
+		sleep 3m
+		
     while [ 1 ]
     do
 	    /usr/local/bin/percona-backup.sh			

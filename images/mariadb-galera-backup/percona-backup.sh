@@ -75,7 +75,6 @@ if [ ! -d $TARGET_FOLDER ]; then
 fi
 
 if [ ! -d $FULL_BACKUP_FOLDER ]; then
-  echo date
   echo "Running the FULL Backup..."
   START_TIME=$SECONDS
   xtrabackup --backup --compress --compress-threads=4 \
@@ -91,13 +90,16 @@ if [ ! -d $FULL_BACKUP_FOLDER ]; then
   echo
 else 
   if [ -n $INC_BACKUP_FOLDER ] && [ ! -d $INC_BACKUP_FOLDER ]; then
-    echo date
     START_TIME=$SECONDS
-    echo "Running the INCREMENTAL Backup..."
+    LAST_INC_BACKUP=$(ls -t ${TARGET_FOLDER} | grep inc_ | head -1) 
+    if [ "$LAST_INC_BACKUP" == "" ]; then 
+      LAST_INC_BACKUP=base
+    fi
+    echo "Running the INCREMENTAL Backup for target base: ${LAST_INC_BACKUP}..."
     xtrabackup --backup --compress --compress-threads=4 \
       --host=$PERCONA_BACKUP_HOST --user=$PERCONA_BACKUP_USER --password=$PERCONA_BACKUP_PASSWORD \
       --target-dir=$INC_BACKUP_FOLDER \
-      --incremental-basedir=$FULL_BACKUP_FOLDER
+      --incremental-basedir=$TARGET_FOLDER/$LAST_INC_BACKUP
     if [ $? -ne 0 ]; then
       echo "!!! Failed! Incremental Backup!"
     fi

@@ -91,7 +91,7 @@ else
 	LAST_INC_BACKUP=$(ls -t ${TEMP_WORKING_BACKUP} | grep inc_ | head -1) 
 	echo "LAST_INC_BACKUP=${LAST_INC_BACKUP}"
 	
-for inc_folder in `ls -t ${TEMP_WORKING_BACKUP} | grep inc_ | sort`; do
+  for inc_folder in `ls -t ${TEMP_WORKING_BACKUP} | grep inc_ | sort`; do
 			if [ "$inc_folder" == "$LAST_INC_BACKUP" ]; then
 				# this must be the last incremental backup, so we don't do --apply-log-only
 				echo ">>>>>"
@@ -104,13 +104,13 @@ for inc_folder in `ls -t ${TEMP_WORKING_BACKUP} | grep inc_ | sort`; do
 				xtrabackup --prepare --target-dir=$TEMP_WORKING_BACKUP/base --incremental-dir=$TEMP_WORKING_BACKUP/$LAST_INC_BACKUP
 			else 
 				echo "<<<<<"
-				echo "Bypassing the increment: ${inc_folder}"
+				echo "Preparing the increment: ${inc_folder}"
 				echo "<<<<<"
-				#xtrabackup --decompress --parallel=4  --remove-original --target-dir=$TEMP_WORKING_BACKUP/$inc_folder
-				#echo "---"
-				#cat $TEMP_WORKING_BACKUP/$inc_folder/xtrabackup_checkpoints
-				#echo "---"
-				#xtrabackup --prepare --apply-log-only --target-dir=$TEMP_WORKING_BACKUP/base --incremental-dir=$TEMP_WORKING_BACKUP/$inc_folder
+				xtrabackup --decompress --parallel=4  --remove-original --target-dir=$TEMP_WORKING_BACKUP/$inc_folder
+				echo "---"
+				cat $TEMP_WORKING_BACKUP/$inc_folder/xtrabackup_checkpoints
+				echo "---"
+				xtrabackup --prepare --apply-log-only --target-dir=$TEMP_WORKING_BACKUP/base --incremental-dir=$TEMP_WORKING_BACKUP/$inc_folder
 			fi
 	done
 
