@@ -238,9 +238,9 @@ mariadb-galera-docker [mysqld.sh](../images/mariadb-galera-docker/mysqld.sh)
 
 mariadb-galera-backup [start.sh](../images/mariadb-galera-backup/start.sh)
 
-mariadb-galera-backup [percona-backup.sh](../images/mariadb-galera-backup/start.sh)
+mariadb-galera-backup [percona-backup.sh](../images/mariadb-galera-backup/percona-backup.sh)
 
-mariadb-galera-backup [percona-restore.sh](../images/mariadb-galera-backup/start.sh)
+mariadb-galera-backup [percona-restore.sh](../images/mariadb-galera-backup/percona-restore.sh)
 
 ## MariaDB Galera Helm Chart
 
