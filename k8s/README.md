@@ -107,7 +107,7 @@ The __Kubernetes__ verion of __mariadb-galera-docker__ enables the integration o
 
 Each Galera instance will bundle a __mariadb-galera-backup__ agent with the last node in the cluster.  It is co-located in the POD with the database engine, and performs periodic backups to a configured NFS share (made available as a persistent volume).
 
-The backup agent will perform periodic compressed backups as a configured interval.  These backups can then be __restored__ into Staging / QA environments:
+The backup agent will perform periodic compressed backups at a configured interval.  These backups can then be __restored__ into Staging / QA environments:
 
 ![MariaDB Galera Docker Backup to QA](docs/images/galera-qa.png)
 
