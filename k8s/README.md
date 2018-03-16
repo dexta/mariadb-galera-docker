@@ -233,10 +233,13 @@ __galera.conf__:
 > Review the output Kubernetes manifests and the source [templates](templates) for insight into the variables and their effect.  Also, for deeper insight, review the shim scripts used in the various underlying container images:
 
 [mariadb-galera-docker start.sh](images/mariadb-galera-docker/start.sh)
+
 [mariadb-galera-docker mysqld.sh](images/mariadb-galera-docker/mysqld.sh)
 
 [mariadb-galera-backup start.sh](images/mariadb-galera-backup/start.sh)
+
 [mariadb-galera-backup percona-backup.sh](images/mariadb-galera-backup/start.sh)
+
 [mariadb-galera-backup percona-restore.sh](images/mariadb-galera-backup/start.sh)
 
 ## MariaDB Helm Chart
